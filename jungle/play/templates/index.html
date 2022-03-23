@@ -1,0 +1,16 @@
+{% if question_list %}
+    <p>Partially hard coded url</p>
+    <ul>
+    {% for question in question_list %}
+        <li><a href="/play/{{ question.id }}/">[{{question.id}}] {{ question.q_text }}</a></li>
+    {% endfor %}
+    </ul>
+    <p>Using percent-url viewname parm: Django will search for the url from correct urls.py</p>
+    <ul>
+    {% for question in question_list %}
+        <li><a href="{% url 'play:detail' question.id %}">[{{question.id}}] {{ question.q_text }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}

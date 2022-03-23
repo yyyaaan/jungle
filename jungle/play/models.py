@@ -2,8 +2,6 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 
-from sympy import timed
-
 # Create your models here.
 class Question(models.Model):
     q_text = models.CharField("question text", max_length=999)
@@ -13,7 +11,7 @@ class Question(models.Model):
         return self.q_text
 
     def is_recent(self):
-        return self.pub_date >= (timezone.now() - timedelta(days=1))
+        return (timezone.now() - timedelta(days=3)) <= self.pub_date <= timezone.now()
 
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
