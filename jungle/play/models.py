@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
@@ -7,9 +8,15 @@ class Question(models.Model):
     q_text = models.CharField("question text", max_length=999)
     pub_date = models.DateTimeField('date published')
 
+
     def __str__(self):
         return self.q_text
 
+    @admin.display(
+        boolean=True,
+        ordering='pub_date',
+        description='Renctly published?'
+    )
     def is_recent(self):
         return (timezone.now() - timedelta(days=3)) <= self.pub_date <= timezone.now()
 

@@ -1,7 +1,7 @@
+from django.urls import reverse
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.views import generic
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
 from .models import *
 
 # Create your views here.
@@ -11,7 +11,7 @@ def vote(request, question_id):
     try:
         sel_choice = question.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):
-        return render(request, 'detail.html', {
+        return render(request, 'play/detail.html', {
             'question': question,
             'error_message': "Please select one choice."
         })
@@ -23,19 +23,26 @@ def vote(request, question_id):
 
 # using generic view to simply process, equivalent to commented area below
 class IndexView(generic.ListView):
-    template_name = "index.html"
+    template_name = "play/index.html"
     contenxt_object_name = 'question_list'
 
     def get_queryset(self):
-        return Question.objects.order_by('-pub_date')[:3]
+        # very speical notation for LessThanEqual
+        return Question.objects.filter(
+            pub_date__lte=timezone.now()
+        ).order_by('-pub_date')[:3]
 
 
 class DetailView(generic.DetailView):
-    template_name = "detail.html"
+    template_name = "play/detail.html"
     model = Question
 
+    def get_queryset(self):
+        """Excludes any questions that aren't published yet."""
+        return Question.objects.filter(pub_date__lte=timezone.now())
+
 class ResultView(generic.DetailView):
-    template_name = "results.html"
+    template_name = "play/results.html"
     model = Question
 
 
