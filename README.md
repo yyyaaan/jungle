@@ -7,7 +7,7 @@ django-admin startproject jungle
 python manage.py startapp play
 python manage.py runserver
 
-python manage.py makemigrate appname
+python manage.py makemigrations appname
 python manage.py migrate
 
 python manage.py createsuperuser
@@ -25,7 +25,7 @@ To set up a new model and its database, go to `settings.py` to INATALLED_APPS, a
 |Unit test| Using `TestCase` class with default test db|
 |Timezone| currently UTC, all date ussing `django.utils.timezone`|
 |Namespace|Follow Django suggestion; plug-n-paly; appname/static_or_template/appname/filename|
-|URL management| App-by-app; `urls.py` under each app|
+|URL management| App-by-app in each `app/urls.py`|
 
 
 
