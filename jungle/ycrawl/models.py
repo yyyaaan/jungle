@@ -16,15 +16,17 @@ class VmRegistry(models.Model):
 
 
 class VmTrail(models.Model):
-    vm = models.ForeignKey(VmRegistry, on_delete=models.CASCADE,)
+    #vm = models.ForeignKey(VmRegistry, on_delete=models.CASCADE,)
 
+    vmid = models.CharField("Assigned VMID", max_length=20)
     event = models.CharField("Event description", max_length=1023)
-    info = models.CharField("Information", max_length=9999)
-    logdt = models.DateTimeField("Timestamp of Event")
+    info = models.CharField("Information", blank=True, max_length=9999)
+    timestamp = models.DateTimeField(auto_now=True)
 
-    @admin.display(boolean=True, ordering="-logdt", description="Event within 24hrs")
+
+    @admin.display(boolean=True, ordering="-timestamp", description="Event within 24hrs")
     def is_within_24_hours(self):
-        return self.logdt >= (timezone.now() - timedelta(days=1)) 
+        return self.timestamp >= (timezone.now() - timedelta(days=1)) 
 
     def __str__(self):
-        return f"{self.event} from {self.vmid} on {self.logdt}"
+        return f"{self.event} from {self.vm} on {self.timestamp}"

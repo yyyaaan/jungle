@@ -8,8 +8,8 @@ class VmRegistryAdmin(admin.ModelAdmin):
     list_display = ("vmid", "provider","project", "batchnum")
     
 class VmTrailAdmin(admin.ModelAdmin):
-    list_display = ("vm", "event", "info", "logdt")
-    list_filter = ["logdt"]
+    list_display = ("vmid", "event", "info", "timestamp")
+    list_filter = ["timestamp"]
     
 
 admin.site.register(VmRegistry, VmRegistryAdmin)

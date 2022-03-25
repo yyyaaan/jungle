@@ -1,19 +1,6 @@
 # Jungle is from Django
 
-A conventional implementation of Django using unit-test.
-
-```
-django-admin startproject jungle
-python manage.py startapp play
-python manage.py runserver
-
-python manage.py makemigrations appname
-python manage.py migrate
-
-python manage.py createsuperuser
-
-python manage.py test appname
-```
+A conventional implementation of Django using unit-test. See sh file for some useful commands.
 
 To set up a new model and its database, go to `settings.py` to INATALLED_APPS, and then perform makemigrations. If folder strucuted different use full path to the automatically generated AppConfig class under `apps.py`.
 
@@ -26,7 +13,9 @@ To set up a new model and its database, go to `settings.py` to INATALLED_APPS, a
 |Timezone| currently UTC, all date ussing `django.utils.timezone`|
 |Namespace|Follow Django suggestion; plug-n-paly; appname/static_or_template/appname/filename|
 |URL management| App-by-app in each `app/urls.py`|
-
+|Fixtures| Initial data are saved to fixtures.json in single file|
+|API Token | Only admin can generate; Bearer set in root|
+|Permissions | Default is IsAuthenticated, but explicited expressed everywhere|
 
 
 ## Some interesting command
@@ -37,4 +26,5 @@ Migration code automatically by `python manage.py makemigrate appname`. SQL migr
 
 ## Deployment checklist
 
-Environment variable for Django Secret
+- Environment variable for Django Secret
+- User group data to be dumped and save to fixture
