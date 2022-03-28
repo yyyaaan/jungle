@@ -30,3 +30,13 @@ class VmTrail(models.Model):
 
     def __str__(self):
         return f"{self.event} from {self.vm} on {self.timestamp}"
+
+
+class VmActionLog(models.Model):
+    vmids = models.ManyToManyField(VmRegistry)
+    event = models.CharField("Event description", max_length=1023)
+    info = models.CharField("Information", blank=True, max_length=9999)
+    timestamp = models.DateTimeField(auto_now=True)
+
+    def vmids_applied(self):
+        return ", ".join([x.vmid for x in self.vmids.all()])

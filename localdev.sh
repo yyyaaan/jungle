@@ -6,6 +6,8 @@ python manage.py startapp play
 
 # create super user, generally only for testing
 python manage.py createsuperuser
+python manage.py addstatictoken myusername
+
 
 # database  and unit testing
 python manage.py makemigrations appname

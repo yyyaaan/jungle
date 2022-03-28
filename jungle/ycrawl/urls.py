@@ -3,10 +3,9 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
+router.register(r'actions', views.VmActionLogViewSet)
 router.register(r'vms', views.VmViewSet)
 router.register(r'trails', views.VmTrailViewSet)
-router.register(r'users', views.UserViewSet)
-router.register(r'groups', views.GroupViewSet)
 
 # api login page disabled, use admin page
 app_name = "ycrawl"

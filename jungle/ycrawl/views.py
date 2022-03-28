@@ -1,11 +1,17 @@
 
 # Create your views here.
-from django.contrib.auth.models import User, Group
 from rest_framework import viewsets, permissions
-
 
 from .models import *
 from .serializers import *
+
+
+class VmActionLogViewSet(viewsets.ModelViewSet):
+    """API endpoint for Vm Actions, no auth required"""
+    queryset = VmActionLog.objects.all().order_by("-timestamp")
+    serializer_class = VmActionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 
 class VmViewSet(viewsets.ModelViewSet):
     """API endpoint for VmRegistry"""
@@ -16,24 +22,7 @@ class VmViewSet(viewsets.ModelViewSet):
 
 class VmTrailViewSet(viewsets.ModelViewSet):
     """API endpoint for VmTrail, no auth required"""
-    queryset = VmTrail.objects.all().order_by("vmid")
+    queryset = VmTrail.objects.all().order_by("-timestamp")
     serializer_class = VmTrailSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser]
-
-
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAdminUser]
