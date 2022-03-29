@@ -4,9 +4,12 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from rest_framework import status
 
+from .models import *
+
 URL_VMS = "/ycrawl/vms/"
 URL_TRAILS = "/ycrawl/trails/"
 URL_ACTIONS = "/ycrawl/actions/"
+URL_SHORTCUTS = "/ycrawl/shortcuts/"
 
 class NoTokenAccessTests(TestCase):
     """No token, no auth'd user cases"""
@@ -62,7 +65,7 @@ class BearerAccessTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
 
-class VmGroupActionTests(TestCase):
+class VmActionNShortcutTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(email='unittest@yan.fi', password='unittestpassword', username='Unit Tester')
@@ -70,22 +73,41 @@ class VmGroupActionTests(TestCase):
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + Token.objects.create(user=self.user).key
         )
-
-    def test_vm_action_create(self):
-        """VM Action create and requested actions will be performed"""
-        vm1 = {"vmid":"vm1", "project":"a", "role": "a", "provider": "a", "zone": "a", "batchnum": 999}
-        vm2 = {"vmid":"vm2", "project":"a", "role": "a", "provider": "a", "zone": "a", "batchnum": 999}
+        # load some vms
+        vm1 = {"vmid":"vm1", "project":"a", "role": "b", "provider": "c", "zone": "a", "batchnum": 999}
+        vm2 = {"vmid":"vm2", "project":"a", "role": "b", "provider": "c", "zone": "a", "batchnum": 999}
         self.client.post(URL_VMS, vm1)
         self.client.post(URL_VMS, vm2)
-         
-        """vmids is register, confirm action logged"""
+
+    def test_vm_action_unregistered(self):
+        """action gives error if not a registered vm"""
+        res = self.client.post(URL_ACTIONS, data={"vmids":["unregistered"], "event": "error"})
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_vm_action_create(self):         
+        """vmids is register, confirm action logged in 2 lines, db record is only 1"""
         res = self.client.post(URL_ACTIONS, data={"vmids":["vm1", "vm2"], "event": "STOP"})
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(VmActionLog.objects.all().count(), 1)
         with open("jungle.log", "r") as f:
             last2log = " ".join(f.readlines()[-2:])
         self.assertIn("Action initiated: stop vm1", last2log)
         self.assertIn("Action initiated: stop vm2", last2log)
+    
+    def test_shortcut_action(self):
+        """Using shortcut should also call action to perform"""
+        prev_count = VmActionLog.objects.all().count()
+        res = self.client.post(URL_SHORTCUTS, data={"project": "a", "event": "START"})
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        # actionlog is also created
+        self.assertEqual(VmActionLog.objects.all().count() - prev_count, 1)
+        # file log contains 2 line
+        with open("jungle.log", "r") as f:
+            last2log = " ".join(f.readlines()[-2:])
+        self.assertIn("Action initiated: start vm1", last2log)
+        self.assertIn("Action initiated: start vm2", last2log)
 
-        """error if not a registered vm"""
-        res = self.client.post(URL_ACTIONS, data={"vmids":["unregistered"], "event": "error"})
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+
+

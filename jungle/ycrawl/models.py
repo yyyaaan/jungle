@@ -9,7 +9,6 @@ logger = getLogger("ycrawl")
 # Create your models here.
 class VmRegistry(models.Model):
     vmid = models.CharField("Assigned VMID", max_length=20, primary_key=True)
-    
     project = models.CharField("Project", max_length=99)
     role = models.CharField("Usage Role", max_length=20)
     provider = models.CharField("Cloud providor", max_length=10)
@@ -19,13 +18,10 @@ class VmRegistry(models.Model):
 
 
 class VmTrail(models.Model):
-    #vm = models.ForeignKey(VmRegistry, on_delete=models.CASCADE,)
-
     vmid = models.CharField("Assigned VMID", max_length=20)
     event = models.CharField("Event description", max_length=1023)
     info = models.CharField("Information", blank=True, max_length=9999)
     timestamp = models.DateTimeField(auto_now=True)
-
 
     @admin.display(boolean=True, ordering="-timestamp", description="Event within 24hrs")
     def is_within_24_hours(self):
@@ -41,5 +37,20 @@ class VmActionLog(models.Model):
     info = models.CharField("Information", blank=True, max_length=9999)
     timestamp = models.DateTimeField(auto_now=True)
 
+    @admin.display(boolean=True, ordering="-timestamp", description="Event within 24hrs")
+    def is_within_24_hours(self):
+        return self.timestamp >= (timezone.now() - timedelta(days=1)) 
+
     def vmids_applied(self):
         return ", ".join([x.vmid for x in self.vmids.all()])
+
+
+class VmActionShortcut(models.Model):
+    """Shortcut action to be sanitized into VmActionLog"""
+    event = models.CharField("Event description", max_length=1023)
+    info = models.CharField("Information", blank=True, max_length=9999)
+    project = models.CharField("Project Filter", blank=True, max_length=99)
+    role = models.CharField("Role Filter", blank=True, max_length=20)
+    provider = models.CharField("Provider Filter", blank=True, max_length=10)
+    timestamp = models.DateTimeField(auto_now=True)
+

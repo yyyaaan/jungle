@@ -9,6 +9,14 @@ from .serializers import *
 API_RENDERERS = [renderers.AdminRenderer, renderers.BrowsableAPIRenderer, renderers.JSONRenderer, renderers.JSONOpenAPIRenderer]
 
 
+class VmActionShortcutViewSet(viewsets.ModelViewSet):
+    """API endpoint for Vm Actions. POST will trigger actions"""
+    queryset = VmActionShortcut.objects.all().order_by("-timestamp")
+    serializer_class = VmActionShortcutSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    renderer_classes = API_RENDERERS
+
+
 class VmActionLogViewSet(viewsets.ModelViewSet):
     """API endpoint for Vm Actions. POST will trigger actions"""
     queryset = VmActionLog.objects.all().order_by("-timestamp")
