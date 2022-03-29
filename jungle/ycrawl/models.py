@@ -2,6 +2,9 @@ from django.contrib import admin
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
+from logging import getLogger
+
+logger = getLogger("ycrawl")
 
 # Create your models here.
 class VmRegistry(models.Model):

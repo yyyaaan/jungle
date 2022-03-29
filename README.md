@@ -18,6 +18,8 @@ To set up a new model and its database, go to `settings.py` to INATALLED_APPS, a
 |API Token | Only admin can generate; Bearer set in root|
 |Permissions | Default is IsAuthenticated, but explicited expressed everywhere|
 |2FA| Admin-site enforced OTP authenticator |
+|Logger| App-centralized config in `models.py` under each module |
+|Cron Job| Not managed in Django; single `cronjobs.py` is to be used for cron|
 
 Actions are performed in `xxActionSerializer` class.
 
@@ -27,3 +29,5 @@ Actions are performed in `xxActionSerializer` class.
 - Environment variable for Django Secret
 - yCrawl database
 - OTP token, service token etc.
+- SSH cert is a must to use Token Auth
+- Log settings config level
