@@ -1,0 +1,25 @@
+{% extends "frontend/parent.html" %}
+{% block content %} 
+<div class="col s12">
+    <ul class="collapsible popout">
+        {% for vm in vm_table %}
+        <li>
+            <div class="collapsible-header"><i class="material-icons">{{vm.icon}}</i>{{vm.header}}</div>
+            <div class="collapsible-body">
+                <div class="right-align">
+                    <form action="/vmaction" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="VMID" value="{{vm.vmid}}">
+                        <button class="btn-flat" name="ACTION" value="START">START</button>
+                        <button class="btn-flat" name="ACTION" value="STOP">STOP</button>
+                    </form>
+                </div>
+                <pre id="vm-detail" class="log-print" style="display: block;">
+                    {% autoescape off %}{{vm.content}}{% endautoescape %}
+                </pre>
+        </div>
+        </li>
+        {% endfor %}
+    </ul>     
+</div>
+{% endblock %}

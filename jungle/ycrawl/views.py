@@ -1,6 +1,8 @@
 
 # Create your views here.
-from rest_framework import viewsets, permissions, renderers
+from rest_framework import viewsets, views, permissions, renderers, status
+from rest_framework.response import Response
+from django.shortcuts import render
 
 from .models import *
 from .serializers import *
@@ -8,13 +10,38 @@ from .serializers import *
 
 API_RENDERERS = [renderers.AdminRenderer, renderers.BrowsableAPIRenderer, renderers.JSONRenderer, renderers.JSONOpenAPIRenderer]
 
-
-class VmActionShortcutViewSet(viewsets.ModelViewSet):
-    """API endpoint for Vm Actions. POST will trigger actions"""
-    queryset = VmActionShortcut.objects.all().order_by("-timestamp")
-    serializer_class = VmActionShortcutSerializer
+class StartYcrawl(views.APIView):
+    """Start yCrawl endpoints"""
     permission_classes = [permissions.IsAuthenticated]
-    renderer_classes = API_RENDERERS
+
+    def __init__(self):
+        self.vmrole = "crawler"
+    
+    def start_ycrawl(self):
+        vm_table = VmRegistry.objects.raw(f"select * from ycrawl_vmregistry where role='{self.vmrole}'")
+
+        if len(vm_table):
+            action_serializer = VmActionSerializer(data={
+                "vmids": [x.vmid for x in vm_table],
+                "event": "START",
+                "info": "Initated by API start-ycrawl" 
+            })        
+            if action_serializer.is_valid(raise_exception=True):
+                action_serializer.save()
+        else:
+            logger.info("No VM satisfies the given criteria.")
+
+        return vm_table
+
+    def get(self, request, format=None):
+        self.vmrole = request.query_params['role'] if 'role' in request.query_params else "crawler"
+        vm_table =  self.start_ycrawl()
+        return render(request, "ycrawl/t1.html", {"h1text": "Action performed", "vm_table": vm_table})
+
+    def post(self, request, format=None):
+        self.vmrole = request.data['role'] if 'role' in request.data else "crawler"
+        vmids = [x.vmid for x in self.start_ycrawl()]
+        return Response({"sucess": True, "vm_applied": vmids}, status=status.HTTP_202_ACCEPTED)
 
 
 class VmActionLogViewSet(viewsets.ModelViewSet):

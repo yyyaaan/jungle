@@ -19,7 +19,7 @@ class VmRegistry(models.Model):
 
 class VmTrail(models.Model):
     vmid = models.CharField("Assigned VMID", max_length=20)
-    event = models.CharField("Event description", max_length=1023)
+    event = models.CharField("Event", max_length=1023)
     info = models.CharField("Information", blank=True, max_length=9999)
     timestamp = models.DateTimeField(auto_now=True)
 
@@ -43,14 +43,3 @@ class VmActionLog(models.Model):
 
     def vmids_applied(self):
         return ", ".join([x.vmid for x in self.vmids.all()])
-
-
-class VmActionShortcut(models.Model):
-    """Shortcut action to be sanitized into VmActionLog"""
-    event = models.CharField("Event description", max_length=1023)
-    info = models.CharField("Information", blank=True, max_length=9999)
-    project = models.CharField("Project Filter", blank=True, max_length=99)
-    role = models.CharField("Role Filter", blank=True, max_length=20)
-    provider = models.CharField("Provider Filter", blank=True, max_length=10)
-    timestamp = models.DateTimeField(auto_now=True)
-

@@ -5,7 +5,6 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r'actions', views.VmActionLogViewSet)
-router.register(r'shortcuts', views.VmActionShortcutViewSet)
 router.register(r'trails', views.VmTrailViewSet)
 router.register(r'vms', views.VmViewSet)
 
@@ -13,5 +12,6 @@ router.register(r'vms', views.VmViewSet)
 app_name = "ycrawl"
 urlpatterns = [
     path('', include(router.urls)),
+    path('START/', views.StartYcrawl.as_view(), name="start_ycrawl")
 #    path('auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

@@ -9,7 +9,7 @@ from .models import *
 URL_VMS = "/ycrawl/vms/"
 URL_TRAILS = "/ycrawl/trails/"
 URL_ACTIONS = "/ycrawl/actions/"
-URL_SHORTCUTS = "/ycrawl/shortcuts/"
+URL_START = "/ycrawl/START/"
 
 class NoTokenAccessTests(TestCase):
     """No token, no auth'd user cases"""
@@ -25,12 +25,20 @@ class NoTokenAccessTests(TestCase):
         res = self.client.get(URL_ACTIONS)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_vm_action_without_token(self):
+        """yCrawl START cannot be called without token"""
+        res = self.client.get(URL_START)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        res = self.client.post(URL_START)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_post_trail_without_token(self):
-        """NOT ok to post, but ok to get"""
+        """NOT ok to post a VM trail"""
         res = self.client.post(URL_TRAILS, data={"vmid": "test", "event":"test"})
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
     
     def test_get_trail_without_token(self):
+        """VM trail is viewable to all"""
         res = self.client.get(URL_TRAILS)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -94,11 +102,11 @@ class VmActionNShortcutTests(TestCase):
         self.assertIn("Action initiated: stop vm1", last2log)
         self.assertIn("Action initiated: stop vm2", last2log)
     
-    def test_shortcut_action(self):
+    def test_start_ycrawl(self):
         """Using shortcut should also call action to perform"""
         prev_count = VmActionLog.objects.all().count()
-        res = self.client.post(URL_SHORTCUTS, data={"project": "a", "event": "START"})
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        res = self.client.post(URL_START, data={"role": "b"})
+        self.assertEqual(res.status_code, status.HTTP_202_ACCEPTED)
         # actionlog is also created
         self.assertEqual(VmActionLog.objects.all().count() - prev_count, 1)
         # file log contains 2 line

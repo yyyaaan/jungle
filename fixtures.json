@@ -94,5 +94,29 @@
             "provider": "GCP",
             "batchnum": 0
         }
+    },
+    {
+        "model": "ycrawl.vmregistry",
+        "pk": "yan-fi-server",
+        "fields": {
+            "project": "legacy",
+            "role": "persistent",
+            "zone": "europe-north1-c",
+            "resource": "default",
+            "provider": "GCP",
+            "batchnum": 999
+        }
+    },
+    {
+        "model": "ycrawl.vmregistry",
+        "pk": "yan-us-server",
+        "fields": {
+            "project": "main",
+            "role": "persistent",
+            "zone": "us-east1-b",
+            "resource": "default",
+            "provider": "GCP",
+            "batchnum": 999
+        }
     }
 ] 

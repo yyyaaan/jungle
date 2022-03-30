@@ -16,7 +16,7 @@ class VmTrailAdmin(admin.ModelAdmin):
 class VmActionLogAdmin(admin.ModelAdmin):
     # many-to-many use the Model Function name
     list_display = ("event", "vmids_applied", "timestamp", "info")
-    list_filter = ["timestamp"]
+    list_filter = ["event", "timestamp"]
 
 
 

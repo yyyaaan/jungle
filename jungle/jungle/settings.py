@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'play',
     'ycrawl',
+    'frontend',
     'rest_framework',
     'rest_framework.authtoken',
     'django_otp',
@@ -95,6 +96,8 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'ycrawl.authentication.BearerAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -183,6 +186,14 @@ LOGGING = {
             'propagate': False,
         },
         'ycrawl': {
+            'handlers': ['console', 'logfile'],
+            'level': 'INFO',
+        },
+        'frontend': {
+            'handlers': ['console', 'logfile'],
+            'level': 'INFO',
+        },
+        'commonlib': {
             'handlers': ['console', 'logfile'],
             'level': 'INFO',
         },

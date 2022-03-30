@@ -13,6 +13,7 @@ To set up a new model and its database, go to `settings.py` to INATALLED_APPS, a
 |Timezone| currently UTC, all date ussing `django.utils.timezone`|
 |Namespace|Follow Django suggestion; plug-n-paly; appname/static_or_template/appname/filename|
 |Templates| Admin and rest_framework in root, all others follow namespace|
+|Frontend| only views (urls, apps), model is imported from other modules|
 |URL management| App-by-app in each `app/urls.py`|
 |Fixtures| Initial data are saved to fixtures.json in single file|
 |API Token | Only admin can generate; Bearer set in root|
@@ -21,12 +22,12 @@ To set up a new model and its database, go to `settings.py` to INATALLED_APPS, a
 |Logger| App-centralized config in `models.py` under each module |
 |Cron Job| Not managed in Django; single `cronjobs.py` is to be used for cron|
 
-Actions are performed in `xxActionSerializer` class.
+Single action is performed in `xxActionSerializer` class; job action group is done in `views(APIView)`. Functionalities are implemented `lib_*.py` files.
 
 
 ## Deployment checklist
 
-- Environment variable for Django Secret
+- Environment variable for Django and Gcloud
 - yCrawl database
 - OTP token, service token etc.
 - SSH cert is a must to use Token Auth

@@ -20,6 +20,7 @@ from django_otp.admin import OTPAdminSite
 admin.site.__class__ = OTPAdminSite
 
 urlpatterns = [
+    path('', include("frontend.urls")),
     path('ycrawl/', include("ycrawl.urls")),
     path('play/', include("play.urls")),
     path('admin/', admin.site.urls),

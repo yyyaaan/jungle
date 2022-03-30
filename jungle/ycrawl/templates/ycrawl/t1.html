@@ -1,0 +1,8 @@
+<h1>{{ h1text }}</h1>
+
+<ul>
+{% for x in vm_table %}
+    <li>{{ x.vmid }} -- {{ x.project }} {{ x.role }}</li>
+{% endfor %}
+</ul>
+
