@@ -27,6 +27,7 @@ SECRET_KEY = environ['djangosecret']
 DEBUG = True
 
 ALLOWED_HOSTS = []
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 
 # Application definition

@@ -82,8 +82,8 @@ class VmActionNShortcutTests(TestCase):
             HTTP_AUTHORIZATION='Bearer ' + Token.objects.create(user=self.user).key
         )
         # load some vms
-        vm1 = {"vmid":"vm1", "project":"a", "role": "b", "provider": "c", "zone": "a", "batchnum": 999}
-        vm2 = {"vmid":"vm2", "project":"a", "role": "b", "provider": "c", "zone": "a", "batchnum": 999}
+        vm1 = {"vmid":"testvm1", "project":"a", "role": "b", "provider": "c", "zone": "a", "batchnum": 999}
+        vm2 = {"vmid":"testvm2", "project":"a", "role": "b", "provider": "c", "zone": "a", "batchnum": 999}
         self.client.post(URL_VMS, vm1)
         self.client.post(URL_VMS, vm2)
 
@@ -93,27 +93,23 @@ class VmActionNShortcutTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_vm_action_create(self):         
-        """vmids is register, confirm action logged in 2 lines, db record is only 1"""
-        res = self.client.post(URL_ACTIONS, data={"vmids":["vm1", "vm2"], "event": "STOP"})
+        """vmids is register, db should record also result"""
+        res = self.client.post(URL_ACTIONS, data={"vmids":["testvm1", "testvm2"], "event": "STOP"})
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(VmActionLog.objects.all().count(), 1)
-        with open("jungle.log", "r") as f:
-            last2log = " ".join(f.readlines()[-2:])
-        self.assertIn("Action initiated: stop vm1", last2log)
-        self.assertIn("Action initiated: stop vm2", last2log)
-    
+        self.assertIn("testvm1 passed", VmActionLog.objects.all().last().result)
+        self.assertIn("testvm2 passed", VmActionLog.objects.all().last().result)
+        
     def test_start_ycrawl(self):
-        """Using shortcut should also call action to perform"""
+        """Using shortcut should also call action to perform, and result is passed"""
         prev_count = VmActionLog.objects.all().count()
         res = self.client.post(URL_START, data={"role": "b"})
         self.assertEqual(res.status_code, status.HTTP_202_ACCEPTED)
         # actionlog is also created
         self.assertEqual(VmActionLog.objects.all().count() - prev_count, 1)
-        # file log contains 2 line
-        with open("jungle.log", "r") as f:
-            last2log = " ".join(f.readlines()[-2:])
-        self.assertIn("Action initiated: start vm1", last2log)
-        self.assertIn("Action initiated: start vm2", last2log)
+        self.assertIn("testvm1 passed", VmActionLog.objects.all().last().result)
+        self.assertIn("testvm2 passed", VmActionLog.objects.all().last().result)
+
 
 
 

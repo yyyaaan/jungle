@@ -13,8 +13,8 @@ class VmActionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, request):
-        perform_action(request)
-        return super().create(request) 
+        result_added = perform_action(request)
+        return super().create(result_added) 
 
 
 class VmSerializer(serializers.ModelSerializer):

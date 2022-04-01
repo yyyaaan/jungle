@@ -1,25 +1,30 @@
 {% extends "frontend/parent.html" %}
+{% block title %}VM Action Panel{% endblock %}
 {% block content %} 
-<div class="col s12">
+<div class="col s12 m9">
+    <p class="right-align" style="margin-right: 30px"> {{debug_text}}</p>
     <ul class="collapsible popout">
         {% for vm in vm_table %}
         <li>
             <div class="collapsible-header"><i class="material-icons">{{vm.icon}}</i>{{vm.header}}</div>
             <div class="collapsible-body">
                 <div class="right-align">
-                    <form action="/vmaction" method="post">
+                    <form action="/vmaction" method="post" target="outputarea" onsubmit="return confirm('Are you sure?');">
                         {% csrf_token %}
                         <input type="hidden" name="VMID" value="{{vm.vmid}}">
                         <button class="btn-flat" name="ACTION" value="START">START</button>
                         <button class="btn-flat" name="ACTION" value="STOP">STOP</button>
                     </form>
                 </div>
-                <pre id="vm-detail" class="log-print" style="display: block;">
-                    {% autoescape off %}{{vm.content}}{% endautoescape %}
-                </pre>
+                <div id="vm-detail" class="log-print" style="display: block;">
+                    <pre>{% autoescape off %}{{vm.content}}{% endautoescape %}</pre>
+                </div>
         </div>
         </li>
         {% endfor %}
     </ul>     
+</div>
+<div class="col s12 m3">
+    <iframe id="outputarea" name="outputarea" width="100%" height="999px" style="border:none;"></iframe>
 </div>
 {% endblock %}

@@ -3,7 +3,7 @@ from json import dumps, loads
 from .secretmanager import *
 from ycrawl.models import VmRegistry
 
-# changes from Flask project: print -> logger, all_vms from model format changed
+# changes from Flask project: print -> logger, all_vms from model format changed, messaging changed
 
 all_vms = VmRegistry.objects.all()
 GCP_VMLIST= dict([(x.vmid, x.zone) for x in all_vms if x.provider == "GCP"])
@@ -44,43 +44,34 @@ def gcp_list_instances(zones=["europe-north1-c"]):
     return n_running, out_list
 
 
-def gcp_vm_startup(vmid, zone, keepinfo=False):
+def gcp_vm_startup(vmid, zone):
     vm_check = [x for x in GCE_CLIENT.list(project="yyyaaannn", zone=zone) if x.name == vmid]
     vm_status = [x.status for x in vm_check][0]
     vm_restricted = [x.start_restricted for x in vm_check][0]
-    info = ""
 
-    if vm_status != "RUNNING":
-        if vm_restricted:
-            logger.info(f"VM Manager: {vmid}({vm_status}) is restricted. Try next time.")
-            return False
-
-        info = f"VM Manager: restarting {vmid} (was {vm_status})"
-        try:
-            GCE_CLIENT.start_unary(project="yyyaaannn", zone=zone, instance=vmid)
-        except Exception as e:
-            logger.info(f"VM Manager: restart failed due to {str(e)}")
-            return False
-
-    if not keepinfo: logger.info(info)
-    return True, info
+    if vm_status == "RUNNING":
+        return False, f"{vmid} is already active, no action"
+    if vm_restricted:
+        return False, f"{vmid}({vm_status}) is restricted."
+    try:
+        GCE_CLIENT.start_unary(project="yyyaaannn", zone=zone, instance=vmid)
+        return True, f"restarting {vmid} (was {vm_status})"
+    except Exception as e:
+        return False, f"starting {vmid} failed due to {str(e)}"
 
 
 def gcp_vm_shutdown(vmid, zone):
     vm_check = [x for x in GCE_CLIENT.list(project="yyyaaannn", zone=zone) if x.name == vmid]
     vm_status = [x.status for x in vm_check][0]
 
-    if vm_status == "RUNNING":
-        logger.info(f"Completion noted: shutting down {vmid}")
-        try:
-            GCE_CLIENT.stop_unary(project="yyyaaannn", zone=zone, instance=vmid)
-        except Exception as e:
-            logger.info(f"Completion noted: shutting down failed due to {str(e)}")
-            return False
-    else:
-        logger.info(f"{vmid} is not running.")
+    if vm_status != "RUNNING":
+        return False, f"{vmid} is not running, no action."
+    try:
+        GCE_CLIENT.stop_unary(project="yyyaaannn", zone=zone, instance=vmid)
+        return True, f"shutting down {vmid}"
+    except Exception as e:
+        return False, f"shutting down {vmid} failed due to {str(e)}"
 
-    return True
 
 
 ############################################################################
@@ -124,31 +115,30 @@ def azure_list_instances(resource_groups=["VM-Workers"]):
     return n_running, out_list
 
 
-def azure_vm_startup(vmid, resource_group, keepinfo=False):
+def azure_vm_startup(vmid, resource_group):
     vm_status = ACE_CLIENT.virtual_machines.get(resource_group, vmid, expand='instanceView').instance_view.statuses[1].display_status
-    info = ""
-    if vm_status != "VM running":
-        info = f"VM Manager: restarting {vmid} (was {vm_status.upper().replace(' ', '')})"
-        try:
-            ACE_CLIENT.virtual_machines.begin_start(resource_group, vmid)
-        except Exception as e:
-            logger.info(f"VM Manager: restart failed due to {str(e)}")
-            return False
-    
-    if not keepinfo: logger.info(info)
-    return True, info
 
+    if vm_status == "VM running":
+        return False, f"{vmid} is already active, no action"
+    try:
+        ACE_CLIENT.virtual_machines.begin_start(resource_group, vmid)
+        return True, f"restarting {vmid} (was {vm_status.upper().replace(' ', '')})"
+    except Exception as e:
+        return False, f"restart {vmid} failed due to {str(e)}"
+    
 
 def azure_vm_shutdown(vmid, resource_group):
-    logger.info(f"Completion noted: shutting down {vmid}")
-    try:
-        # Azure: power off is billable, must be deallocated
+    vm_status = ACE_CLIENT.virtual_machines.get(resource_group, vmid, expand='instanceView').instance_view.statuses[1].display_status
+    # Azure: power off is billable, must be deallocated
+    
+    if vm_status != "VM running":
+        return False, f"{vmid} is not running, no action"
+    try: 
         ACE_CLIENT.virtual_machines.begin_deallocate(resource_group, vmid)
+        return True, f"shutting down {vmid}"
     except Exception as e:
         logger.info(f"Completion noted: shutting down failed due to {str(e)}")
-        return False
-
-    return True
+        return False, f"shutting down {vmid} failed due to {str(e)}"
 
 
 ####################################################################
@@ -192,33 +182,31 @@ def aws_list_instances(instance_ids=["i-05baaec0fe7fe4d66", "i-07a9cb47522f26bf8
     return n_running, out_list
 
 
-def aws_vm_startup(vmid, instance_id, keepinfo=False):
+def aws_vm_startup(vmid, instance_id):
 
     ec2_client = aws_get_client(instance_id)
-    info = ""
-    
     vm_status = ec2_client.describe_instances(InstanceIds=[instance_id])['Reservations'][0]['Instances'][0]['State']['Name'].upper()
-    if vm_status != "RUNNING":
-        info = f"VM Manager: restarting {vmid} (was {vm_status.upper().replace(' ', '')})"
-        try:
-           ec2_client.start_instances(InstanceIds=[instance_id])        
-        except Exception as e:
-            logger.info(f"VM Manager: restart failed due to {str(e)}")
-            return False
 
-    if not keepinfo: logger.info(info)
-    return True, info
+    if vm_status == "RUNNING":
+        return False, f"{vmid} is already active, no action"
+    try:
+        ec2_client.start_instances(InstanceIds=[instance_id])
+        return True, f"restarting {vmid} (was {vm_status.upper().replace(' ', '')})"
+    except Exception as e:
+        return False, f"starting {vmid} failed due to {str(e)}"
 
 
 def aws_vm_shutdown(vmid, instance_id):
-    logger.info(f"Completion noted: shutting down {vmid}")
-    try:
-        aws_get_client(instance_id).stop_instances(InstanceIds=[instance_id])
-    except Exception as e:
-        logger.info(f"Completion noted: shutting down failed due to {str(e)}")
-        return False
+    ec2_client = aws_get_client(instance_id)
+    vm_status = ec2_client.describe_instances(InstanceIds=[instance_id])['Reservations'][0]['Instances'][0]['State']['Name'].upper()
 
-    return True
+    if vm_status != "RUNNING":
+        return False, f"{vmid} is not running, no action"
+    try:
+        ec2_client.stop_instances(InstanceIds=[instance_id])
+        return True, f"shutting down {vmid}"
+    except Exception as e:
+        return False, f"shutting down failed due to {str(e)}"
 
 
 #########################################################
@@ -242,25 +230,29 @@ def vm_list_all():
     return n_running1 + n_running2 + n_running3, vm_list
 
 
-def vm_startup(vmid, keepinfo=False):
+def vm_startup(vmid):
     status, info = False, ""
+    if str(vmid)[:4] == "test":
+        status, info = True, f"start {vmid} passed"
     if vmid in GCP_VMLIST.keys():
-        status, info = gcp_vm_startup(vmid=vmid, zone=GCP_VMLIST[vmid], keepinfo=keepinfo)
+        status, info = gcp_vm_startup(vmid=vmid, zone=GCP_VMLIST[vmid])
     if vmid in AZURE_VMLIST.keys():
-        status, info = azure_vm_startup(vmid=vmid, resource_group=AZURE_VMLIST[vmid], keepinfo=keepinfo)
+        status, info = azure_vm_startup(vmid=vmid, resource_group=AZURE_VMLIST[vmid])
     if vmid in AWS_VMLIST.keys():
-        status, info = aws_vm_startup(vmid=vmid, instance_id=AWS_VMLIST[vmid], keepinfo=keepinfo)
+        status, info = aws_vm_startup(vmid=vmid, instance_id=AWS_VMLIST[vmid])
 
     return status, info
 
 
 def vm_shutdown(vmid):
     status = False
+    if str(vmid)[:4] == "test":
+        status, info = True, f"stop {vmid} passed"
     if vmid in GCP_VMLIST.keys():
-        status = gcp_vm_shutdown(vmid=vmid, zone=GCP_VMLIST[vmid])
+        status, info = gcp_vm_shutdown(vmid=vmid, zone=GCP_VMLIST[vmid])
     if vmid in AZURE_VMLIST.keys():
-        status = azure_vm_shutdown(vmid=vmid, resource_group=AZURE_VMLIST[vmid])
+        status, info = azure_vm_shutdown(vmid=vmid, resource_group=AZURE_VMLIST[vmid])
     if vmid in AWS_VMLIST.keys():
-        status = aws_vm_shutdown(vmid=vmid, instance_id=AWS_VMLIST[vmid])
+        status, info = aws_vm_shutdown(vmid=vmid, instance_id=AWS_VMLIST[vmid])
 
-    return status
+    return status, info

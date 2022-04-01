@@ -1,7 +1,6 @@
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.db.models import Value, CharField
 from datetime import date
 from logging import getLogger
 
@@ -18,10 +17,24 @@ def hello(request):
 
 @login_required(login_url='/admin/login/')
 def vm_management(request):
+    if request.method != "GET":
+        return HttpResponseForbidden
 
-    # vms = VmRegistry.objects.exclude(project = "test")
-    n_running, vms = vm_list_all()
-    return render(request, 'frontend/vmlist.html', {"h1text": "VM list", "vm_table": vms})
+    if "status" in request.GET:
+        n_running, vms = vm_list_all()
+    else:
+        n_running, vms = -1, VmRegistry.objects.raw("""
+            select  vmid || "  [" || project || " - " || role || "]" as header,
+                    "<a href='/vms?status=1'>click to load status</a>" as content,
+                    case when project = "yCrawl" then "loyalty" else "filter_drama" end as icon,
+                    vmid
+            from ycrawl_vmregistry 
+            where role != "test"
+        """)
+
+    info = f"{n_running} active computing nodes" if n_running > 0 else ""
+    
+    return render(request, 'frontend/vmlist.html', {"debug_text": info, "vm_table": vms})
 
 
 @login_required(login_url='/admin/login/')
@@ -42,12 +55,31 @@ def vm_action(request):
         return HttpResponseBadRequest()
 
     """Get some data"""
-    logs = VmActionLog.objects.filter(timestamp__gte=date.today())
-    trails =  VmTrail.objects.filter(timestamp__gte=date.today())
-    html = "<p>Below are abstract of Today's activity log.</p><p>"
-    html += "<br/>".join([f"{x.timestamp} [{','.join([xx.vmid for xx in x.vmids.all()])}] {x.event} {x.info}" for x in logs])
-    html += "</p><p>"
-    html += "<br/>".join([f"{x.timestamp} {x.vmid} {x.event} {x.info}" for x in trails])
-    html += "</p><p><a href='/admin/ycrawl/vmactionlog/'> Action Log</a> | <a href='/admin/ycrawl/vmtrail/'> Trails </a></p>"
+    nice_br = "<br/><span style='color:transparent'>00:00:00 </span>"
+    logs = [
+        f"""
+        {x.timestamp.strftime('%H:%M:%S')} {x.event}
+        <i>{','.join([xx.vmid for xx in x.vmids.all()])}</i>
+        {nice_br} {x.result}
+        {nice_br} {x.info}
+        """ for x in VmActionLog.objects.filter(timestamp__gte=date.today()).order_by("-timestamp")[:10]
+    ]
+    trails = [
+        f"{x.timestamp.strftime('%H:%M:%S')} {x.event} {x.vmid} {nice_br} {x.info}" 
+        for x in VmTrail.objects.filter(timestamp__gte=date.today()).order_by("-timestamp")[:10]
+    ]
 
-    return render(request, 'frontend/index.html', {"h1text": "VM Action Submitted", "mainhtml": html})
+    payload = {
+        "h1text": "VM Action Submitted",
+        "mainhtml": f"""
+            <p>Below are abstract of Today's latest 10 activity log.</p>
+            <p>{"<br/>".join(logs)}</p>
+            <p>{"<br/>".join(trails)}</p>
+            <p>
+                <a target='_blank' href='/admin/ycrawl/vmactionlog/'> Action Log</a> | 
+                <a target='_blank' href='/admin/ycrawl/vmtrail/'> Trails </a>
+            </p>    
+        """
+    }
+
+    return render(request, 'frontend/minimal.html', payload)

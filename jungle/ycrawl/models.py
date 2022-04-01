@@ -35,6 +35,7 @@ class VmActionLog(models.Model):
     vmids = models.ManyToManyField(VmRegistry)
     event = models.CharField("Event description", max_length=1023)
     info = models.CharField("Information", blank=True, max_length=9999)
+    result = models.CharField("Action Output", blank=True, max_length=9999)
     timestamp = models.DateTimeField(auto_now=True)
 
     @admin.display(boolean=True, ordering="-timestamp", description="Event within 24hrs")
