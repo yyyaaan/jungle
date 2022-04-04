@@ -20,7 +20,7 @@ To set up a new model and its database, go to `settings.py` to INATALLED_APPS, a
 |Permissions | Default is IsAuthenticated, but explicited expressed everywhere|
 |2FA| Admin-site enforced OTP authenticator |
 |Logger| App-centralized config in `models.py` under each module |
-|Cron Job| Not managed in Django; single `cronjobs.py` is to be used for cron|
+|Cron Job| Not managed in Django; single `cronjobs.py` is to be used for crontab|
 
 Single action is performed in `xxActionSerializer` class; job action group is done in `views(APIView)`. Functionalities are implemented `lib_*.py` files.
 

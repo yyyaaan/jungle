@@ -16,6 +16,7 @@ class StartYcrawl(views.APIView):
 
     def __init__(self):
         self.vmrole = "crawler"
+        self.isstart = True
     
     def start_ycrawl(self):
         vm_table = VmRegistry.objects.raw(f"select * from ycrawl_vmregistry where role='{self.vmrole}'")
@@ -23,7 +24,7 @@ class StartYcrawl(views.APIView):
         if len(vm_table):
             action_serializer = VmActionSerializer(data={
                 "vmids": [x.vmid for x in vm_table],
-                "event": "START",
+                "event": ("START" if self.isstart else "STOP"),
                 "info": "Initated by API start-ycrawl" 
             })        
             if action_serializer.is_valid(raise_exception=True):
@@ -35,11 +36,13 @@ class StartYcrawl(views.APIView):
 
     def get(self, request, format=None):
         self.vmrole = request.query_params['role'] if 'role' in request.query_params else "crawler"
+        self.isstart = False if 'stop' in request.query_params else True
         vm_table =  self.start_ycrawl()
         return render(request, "ycrawl/t1.html", {"h1text": "Action performed", "vm_table": vm_table})
 
     def post(self, request, format=None):
         self.vmrole = request.data['role'] if 'role' in request.data else "crawler"
+        self.isstart = False if 'stop' in request.data else True
         vmids = [x.vmid for x in self.start_ycrawl()]
         return Response({"sucess": True, "vm_applied": vmids}, status=status.HTTP_202_ACCEPTED)
 
@@ -79,3 +82,10 @@ class VmTrailViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     renderer_classes = API_RENDERERS
 
+
+class YCrawlConfigViewSet(viewsets.ModelViewSet):
+    """yCrawl Configuration in simple tabular storage"""
+    queryset = YCrawlConfig.objects.all().order_by("name")
+    serializer_class = YCrawlConfigSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    renderer_classes = API_RENDERERS

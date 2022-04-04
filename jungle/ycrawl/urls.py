@@ -7,6 +7,7 @@ router = routers.DefaultRouter()
 router.register(r'actions', views.VmActionLogViewSet)
 router.register(r'trails', views.VmTrailViewSet)
 router.register(r'vms', views.VmViewSet)
+router.register(r'config', views.YCrawlConfigViewSet)
 
 # api login page disabled, use admin page
 app_name = "ycrawl"

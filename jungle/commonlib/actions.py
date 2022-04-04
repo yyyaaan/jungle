@@ -4,7 +4,7 @@ from .vmmanager import *
 def perform_action(validated_request):
     # startup, shutdown based on vmid_list
     # logger.info("Action received from VM Action Serializer")
-    results = ["-"]
+    results = ["**"]
 
     try:
         action = validated_request["event"]
@@ -12,11 +12,11 @@ def perform_action(validated_request):
 
         if action == "START":
             for vmid in vmid_list:
-                status, info = vm_startup(vmid)
+                _, info = vm_startup(vmid)
                 results.append(info)            
         elif action == "STOP":
             for vmid in vmid_list:
-                status, info = vm_shutdown(vmid)
+                _, info = vm_shutdown(vmid)
                 results.append(info)
         else:
             logger.warn(f"Unknown action {action}")

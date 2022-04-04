@@ -1,3 +1,4 @@
+from tkinter.tix import Tree
 from django.contrib import admin
 from django.db import models
 from django.utils import timezone
@@ -6,7 +7,7 @@ from logging import getLogger
 
 logger = getLogger("ycrawl")
 
-# Create your models here.
+
 class VmRegistry(models.Model):
     vmid = models.CharField("Assigned VMID", max_length=20, primary_key=True)
     project = models.CharField("Project", max_length=99)
@@ -44,3 +45,8 @@ class VmActionLog(models.Model):
 
     def vmids_applied(self):
         return ", ".join([x.vmid for x in self.vmids.all()])
+
+
+class YCrawlConfig(models.Model):
+    name = models.CharField(max_length=1023, primary_key=True)
+    value = models.CharField("Value (json as str)", max_length=65535, blank=True)
