@@ -1,9 +1,10 @@
-from tkinter.tix import Tree
 from django.contrib import admin
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from datetime import timedelta
 from logging import getLogger
+from json import loads
 
 logger = getLogger("ycrawl")
 
@@ -48,5 +49,22 @@ class VmActionLog(models.Model):
 
 
 class YCrawlConfig(models.Model):
+    """Simple Tabular Data, contains validated JSON fields"""
     name = models.CharField(max_length=1023, primary_key=True)
-    value = models.CharField("Value (json as str)", max_length=65535, blank=True)
+    value = models.TextField("Value (json as str)", max_length=65535, blank=True)
+
+    @classmethod
+    def get_json_by_name(cls, name):
+        return loads(cls.objects.get(pk=name).value)
+
+    def clean(self):
+        """Reject ill-formed vlaue"""
+        try:
+            loads(self.value)
+        except Exception as e:
+            raise ValidationError({"value": f"Invalid JSON. {str(e)}"})
+        return self
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)

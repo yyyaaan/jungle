@@ -2,7 +2,9 @@ from django.contrib import admin
 
 from .models import *
 
-# Register your models here.
+class YCrawlConfigAdmin(admin.ModelAdmin):
+    list_display = ("name", "value")
+
 
 class VmRegistryAdmin(admin.ModelAdmin):
     list_display = ("vmid", "provider","project", "batchnum")
@@ -19,7 +21,7 @@ class VmActionLogAdmin(admin.ModelAdmin):
     list_filter = ["event", "timestamp"]
 
 
-
 admin.site.register(VmRegistry, VmRegistryAdmin)
 admin.site.register(VmTrail, VmTrailAdmin)
 admin.site.register(VmActionLog, VmActionLogAdmin)
+admin.site.register(YCrawlConfig, YCrawlConfigAdmin)

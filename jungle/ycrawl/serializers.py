@@ -30,16 +30,6 @@ class VmTrailSerializer(ModelSerializer):
 
 
 class YCrawlConfigSerializer(ModelSerializer):
-    """JSON is saved as string since SQLITE does not support JSON"""
-
-    def validate(self, data):
-        """Reject ill-form vlaue"""
-        try:
-            loads(data['value'])
-        except Exception as e:
-            raise ValidationError(f"given value is not valid JSON at {str(e)}")
-        return data
-
     class Meta:
         model = YCrawlConfig
         fields = '__all__'

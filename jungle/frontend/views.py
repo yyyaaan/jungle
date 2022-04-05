@@ -5,6 +5,7 @@ from datetime import date
 from logging import getLogger
 
 from commonlib.vmmanager import vm_list_all
+from commonlib.ycrawlurlmaker import call_url_coordinator
 
 from ycrawl.serializers import *
 
@@ -12,7 +13,8 @@ logger = getLogger("frontend")
 
 # Create your views here.
 def hello(request):
-    return render(request, 'frontend/index.html', {"h1text": "Hello Frontend"})
+    tmp = call_url_coordinator(batch=999, total_batches=1, no_check=True, type="ARR")
+    return render(request, 'frontend/index.html', {"h1text": "Hello Frontend", "mainhtml": len(tmp)})
 
 
 @login_required(login_url='/admin/login/')
