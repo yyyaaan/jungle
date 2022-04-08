@@ -17,5 +17,4 @@ python manage.py test appname
 # save current data to fixtures, for future loaddata
 python ./jungle/manage.py dumpdata ycrawl > xxx.json
 
-
 python ./jungle/manage.py runserver

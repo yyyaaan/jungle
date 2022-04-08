@@ -9,7 +9,66 @@ all_vms = VmRegistry.objects.all()
 GCP_VMLIST= dict([(x.vmid, x.zone) for x in all_vms if x.provider == "GCP"])
 AZURE_VMLIST = dict([(x.vmid, x.resource) for x in all_vms if x.provider == "Azure"])
 AWS_VMLIST = dict([(x.vmid, x.resource) for x in all_vms if x.provider == "AWS"])
+CSC_VMLIST = dict([(x.vmid, x.resource) for x in all_vms if x.provider == "CSC"])
+
 SECRET = loads(get_secret("ycrawl-credentials"))
+
+
+#####################################################
+#    ___                       _             _    
+#   / _ \ _ __   ___ _ __  ___| |_ __ _  ___| | __
+#  | | | | '_ \ / _ \ '_ \/ __| __/ _` |/ __| |/ /
+#  | |_| | |_) |  __/ | | \__ \ || (_| | (__|   < 
+#   \___/| .__/ \___|_| |_|___/\__\__,_|\___|_|\_\
+#        |_|                                         
+# clouds.yaml includes crendentials #################
+
+
+import openstack
+# https://docs.openstack.org/openstacksdk/latest/user/proxies/compute.html
+openstack.enable_logging(debug=False)
+openstackconn = openstack.connect(cloud='openstack')
+
+def csc_list_instances(vm_names):
+    out_list, n_running = [], 0
+    for instance in openstackconn.compute.servers():
+        if str(instance.name) not in vm_names:
+            continue
+        out_list.append({
+            "vmid": str(instance.name),
+            "header": f"{instance.name} {instance.vm_state} (csc-nova)  {instance.flavor['original_name']}",
+            "content": dumps(str(instance)).replace(", ", ",<br/>").replace('\\"', '"')[1:-1]
+        })
+        if instance.status == 'active': 
+            n_running += 1
+
+    return n_running, out_list
+
+
+def csc_vm_startup(vmid):
+    the_vm = [x for x in openstackconn.compute.servers() if x.name == vmid].pop()
+    vm_status = str(the_vm.vm_state)
+
+    if vm_status == "active":
+        return False, f"{vmid} is already active, no action"
+    try:
+        openstackconn.compute.unshelve_server(the_vm)
+        return True, f"restarting {vmid} (was {vm_status})"
+    except Exception as e:
+        return False, f"starting {vmid} failed due to {str(e)}"
+
+
+def csc_vm_shutdown(vmid):
+    the_vm = [x for x in openstackconn.compute.servers() if x.name == vmid][0]
+
+    if the_vm.vm_state != "active":
+        return False, f"{vmid} is not running, no action."
+    try:
+        openstackconn.compute.shelve_server(the_vm)
+        return True, f"shutting down {vmid}"
+    except Exception as e:
+        return False, f"shutting down {vmid} failed due to {str(e)}"
+
 
 
 ###############################################################
@@ -221,13 +280,14 @@ def vm_list_all():
     n_running1, vm_list1 = gcp_list_instances(list(GCP_VMLIST.values()))
     n_running2, vm_list2 = azure_list_instances(list(AZURE_VMLIST.values()))
     n_running3, vm_list3 = aws_list_instances(list(AWS_VMLIST.values()))
+    n_running4, vm_list4 = csc_list_instances(list(CSC_VMLIST.keys()))
     
-    vm_list = vm_list1 + vm_list2 + vm_list3
+    vm_list = vm_list1 + vm_list2 + vm_list3 + vm_list4
     vm_list.sort(key=lambda x: x["header"])
     for i, x in enumerate(vm_list):
         x["icon"] = f"filter_{i+1}"
 
-    return n_running1 + n_running2 + n_running3, vm_list
+    return n_running1 + n_running2 + n_running3 + n_running4, vm_list
 
 
 def vm_startup(vmid):
@@ -240,6 +300,8 @@ def vm_startup(vmid):
         status, info = azure_vm_startup(vmid=vmid, resource_group=AZURE_VMLIST[vmid])
     if vmid in AWS_VMLIST.keys():
         status, info = aws_vm_startup(vmid=vmid, instance_id=AWS_VMLIST[vmid])
+    if vmid in CSC_VMLIST.keys():
+        status, info = csc_vm_startup(vmid=vmid)
 
     return status, info
 
@@ -254,5 +316,7 @@ def vm_shutdown(vmid):
         status, info = azure_vm_shutdown(vmid=vmid, resource_group=AZURE_VMLIST[vmid])
     if vmid in AWS_VMLIST.keys():
         status, info = aws_vm_shutdown(vmid=vmid, instance_id=AWS_VMLIST[vmid])
+    if vmid in CSC_VMLIST.keys():
+        status, info = csc_vm_shutdown(vmid=vmid)
 
     return status, info

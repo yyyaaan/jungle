@@ -85,6 +85,30 @@
     },
     {
         "model": "ycrawl.vmregistry",
+        "pk": "ycrawl-7-csc",
+        "fields": {
+            "project": "yCrawl",
+            "role": "crawler",
+            "batchnum": 6,
+            "zone": "nova",
+            "resource": "b8c84391-057f-41a5-b1f7-711ee2dc7767",
+            "provider": "CSC"
+        }
+    },
+    {
+        "model": "ycrawl.vmregistry",
+        "pk": "ycrawl-8-csc",
+        "fields": {
+            "project": "yCrawl",
+            "role": "crawler",
+            "batchnum": 7,
+            "zone": "nova",
+            "resource": "9eb5665a-91e4-404a-b737-0659cb9b124c",
+            "provider": "CSC"
+        }
+    },
+    {
+        "model": "ycrawl.vmregistry",
         "pk": "ycrawl-data-processor",
         "fields": {
             "project": "yCrawl",
@@ -92,7 +116,7 @@
             "zone": "europe-north1-a",
             "resource": "default",
             "provider": "GCP",
-            "batchnum": 0
+            "batchnum": 999
         }
     },
     {

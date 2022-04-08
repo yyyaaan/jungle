@@ -1,4 +1,10 @@
-<h1> {{h1text}}</h1>
-<div>
+{% extends "frontend/parent.html" %}
+{% block title %}{{h1text}}{% endblock %}
+{% block content %} 
+<div class="col s3">
+    <h1> {{h1text}}</h1>
+</div>
+<div class="col s9">
 {% autoescape off %}{{mainhtml}}{% endautoescape %}
 </div>
+{% endblock %}

@@ -3,12 +3,55 @@
 from rest_framework import viewsets, views, permissions, renderers, status
 from rest_framework.response import Response
 from django.shortcuts import render
+from datetime import date
 
 from .models import *
 from .serializers import *
+from commonlib.ycrawlurlmaker import call_url_coordinator
 
 
 API_RENDERERS = [renderers.AdminRenderer, renderers.BrowsableAPIRenderer, renderers.JSONRenderer, renderers.JSONOpenAPIRenderer]
+
+class GetNodeJobs(views.APIView):
+    """Provide list of NodeJS jobs for yCrawl nodes"""
+
+    def __init__(self):
+        self.debug = True
+        # get total batches based on started VMs
+        qualified_log = VmActionLog.objects.filter(
+            info__icontains = "API start-ycrawl",
+            timestamp__gte = date.today(),
+        )
+        if not self.debug:
+            qualified_log.filter(event="START")
+
+        working_vms = qualified_log.last().vmids.all() if len(qualified_log) else VmRegistry.objects.filter(role="crawler")
+        self.batchref = dict([(x.vmid, x.batchnum) for x in working_vms])
+        self.batchref["all"] = 999
+
+    def get(self, request, format=None):
+        if 'vmid' not in request.query_params or request.query_params["vmid"] not in self.batchref:
+            return Response({"message": "invalid vmid"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        batchn = self.batchref[request.query_params["vmid"]]
+        output = call_url_coordinator(
+            batch = batchn,
+            total_batches = len(self.batchref),
+            no_check = self.debug,
+            type = "ONE"
+        )
+
+        n_output = len(output.split('\n'))
+        trail_serializer = VmTrailSerializer(data={
+            "vmid": request.query_params["vmid"],
+            "event": "NodeJS jobs requested",
+            "info": f"{n_output} jobs returned for batch-{batchn}" 
+        })        
+        if trail_serializer.is_valid(raise_exception=True):
+            trail_serializer.save()
+    
+        return render(request, "ycrawl/raw.html", {"output": output})
+
 
 class StartYcrawl(views.APIView):
     """Start yCrawl endpoints"""
@@ -47,14 +90,6 @@ class StartYcrawl(views.APIView):
         return Response({"sucess": True, "vm_applied": vmids}, status=status.HTTP_202_ACCEPTED)
 
 
-class VmActionLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for Vm Actions. POST will trigger actions"""
-    queryset = VmActionLog.objects.all().order_by("-timestamp")
-    serializer_class = VmActionSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    renderer_classes = API_RENDERERS
-
-
 class VmViewSet(viewsets.ModelViewSet):
     """VM Registry. Update in admin or via API."""
     queryset = VmRegistry.objects.all().order_by("vmid")
@@ -74,6 +109,15 @@ class VmViewSet(viewsets.ModelViewSet):
             return VmRegistry.objects.filter(role=role)
 
         return super().get_queryset()
+
+
+class VmActionLogViewSet(viewsets.ModelViewSet):
+    """API endpoint for Vm Actions. POST will trigger actions"""
+    queryset = VmActionLog.objects.all().order_by("-timestamp")
+    serializer_class = VmActionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    renderer_classes = API_RENDERERS
+
 
 class VmTrailViewSet(viewsets.ModelViewSet):
     """API endpoint for VmTrail; entry is posted by VM directly"""
