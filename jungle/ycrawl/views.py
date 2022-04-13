@@ -28,8 +28,11 @@ class GetNodeJobs(views.APIView):
         working_vms = qualified_log.last().vmids.all() if len(qualified_log) else VmRegistry.objects.filter(role="crawler")
         self.batchref = dict([(x.vmid, x.batchnum) for x in working_vms])
         self.batchref["all"] = 999
-
+        
     def get(self, request, format=None):
+        if format=="CRON": 
+            return call_url_coordinator(no_check=self.debug, type="LIST"), self.batchref
+
         if 'vmid' not in request.query_params or request.query_params["vmid"] not in self.batchref:
             return Response({"message": "invalid vmid"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -49,7 +52,7 @@ class GetNodeJobs(views.APIView):
         })        
         if trail_serializer.is_valid(raise_exception=True):
             trail_serializer.save()
-    
+
         return render(request, "ycrawl/raw.html", {"output": output})
 
 
@@ -76,7 +79,7 @@ class StartYcrawl(views.APIView):
             logger.info("No VM satisfies the given criteria.")
 
         return vm_table
-
+    
     def get(self, request, format=None):
         self.vmrole = request.query_params['role'] if 'role' in request.query_params else "crawler"
         self.isstart = False if 'stop' in request.query_params else True
@@ -87,6 +90,7 @@ class StartYcrawl(views.APIView):
         self.vmrole = request.data['role'] if 'role' in request.data else "crawler"
         self.isstart = False if 'stop' in request.data else True
         vmids = [x.vmid for x in self.start_ycrawl()]
+        if format=="CRON": return "OK"
         return Response({"sucess": True, "vm_applied": vmids}, status=status.HTTP_202_ACCEPTED)
 
 

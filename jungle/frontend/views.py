@@ -125,4 +125,4 @@ def vm_action(request):
         """
     }
 
-    return render(request, 'frontend/minimal.html', payload)
+    return render(request, 'minimal.html', payload)

@@ -23,6 +23,7 @@ urlpatterns = [
     path('', include("frontend.urls")),
     path('ycrawl/', include("ycrawl.urls")),
     path('play/', include("play.urls")),
+    path('vision/', include("vision.urls")),
     path('admin/', admin.site.urls),
 ]
 

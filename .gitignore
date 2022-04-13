@@ -1,6 +1,10 @@
 migrations/
+explore/
+media/vision/
+opencv_model/
 zzz*
 clouds.yaml
+localtest.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
