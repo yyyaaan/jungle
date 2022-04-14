@@ -4,6 +4,7 @@ from requests import post
 from django.db import models
 from google.cloud import vision
 from logging import getLogger
+from base64 import b64encode, b64decode
 
 from commonlib.secretmanager import get_secret
 from jungle.settings import BASE_DIR
@@ -34,12 +35,27 @@ class VisionDB(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
 
 
+def get_img_bytes(source, max_width=900.0):
+    # image_data = open(source, "rb").read()
+    # resize if needed
+    img = cv2.imread(source)
+    if img.shape[1] > max_width:
+        print (img.shape)
+        height = img.shape[0] * max_width / img.shape[1] 
+        img = cv2.resize(img, (int(max_width), int(height)), interpolation = cv2.INTER_AREA)
+
+    _, frame_buff = cv2.imencode('.jpg', img) 
+    image_data = b64encode(frame_buff).decode("UTF-8")
+
+    return img, image_data
+
+
 class GCPDetector:
     def __init__(self):
         self.client = vision.ImageAnnotatorClient()
 
     def readImage(self, source, display=False):
-        image_data = open(source, "rb").read()
+        img, image_data = get_img_bytes(source)
 
         analysis = self.client. \
             object_localization(image=vision.Image(content=image_data)). \
@@ -48,7 +64,6 @@ class GCPDetector:
         for objname in set([obj.name for obj in analysis]):
             color_map[objname] = np.random.uniform(0, 255, size=3)
 
-        img = cv2.imread(source)
         hh, ww, _ = img.shape
         for obj in analysis:
             label = obj.name
@@ -76,8 +91,9 @@ class AZDetector:
         self.endpoint = "https://yyyazurecv.cognitiveservices.azure.com/vision/v3.2/analyze"
 
     def readImage(self, source, display=False):
-        image_data = open(source, "rb").read()
-
+        img, image_data = get_img_bytes(source)
+        image_data = b64decode(image_data)
+  
         # https://westus.dev.cognitive.microsoft.com/docs/services/computer-vision-v3-2/operations/56f91f2e778daf14a499f21b
         response = post(
             self.endpoint,
@@ -92,7 +108,6 @@ class AZDetector:
             color_map[objname] = np.random.uniform(0, 255, size=3)
 
         # use cv2 to display pic
-        img = cv2.imread(source)
         title = analysis["description"]["captions"][0]['text'].capitalize()
         for obj in analysis["objects"]:
             x,y,w,h = obj["rectangle"].values()

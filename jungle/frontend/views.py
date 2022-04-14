@@ -31,7 +31,9 @@ def hello(request):
     all_urls = [''.join(p) for p in list_urls(urlconf.urlpatterns)]
     tmp = "<br/>".join([x for x in all_urls if "admin" not in x])
 
-    return render(request, 'frontend/index.html', {"h1text": "Hello Frontend", "mainhtml": tmp})
+    tmp = '<i class="material-icons medium">party_mode</i><br/>' + tmp
+
+    return render(request, 'frontend/index.html', {"h1text": "Under Construction", "mainhtml": tmp})
 
 
 def show_ycrawl_config(request):

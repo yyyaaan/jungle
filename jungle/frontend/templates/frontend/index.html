@@ -1,10 +1,24 @@
 {% extends "parent.html" %}
 {% block title %}{{h1text}}{% endblock %}
 {% block content %} 
-<div class="col s3">
+<div class="col m3 s12">
+</div>
+<div class="col m9 s12" style="margin-bottom: 20%">
+    <p>
+        <a class="waves-effect waves-light btn-large" href="/vision">
+            <i class="material-icons left">party_mode</i>AI Vision
+        </a>
+    </p>
+</div>
+{% endblock %}
+
+{% block contentmore %} 
+<div class="col m3 s12">
     <h1> {{h1text}}</h1>
 </div>
-<div class="col s9">
+<div class="col m1 s12">
+</div>
+<div class="col m8 s12">
 {% autoescape off %}{{mainhtml}}{% endautoescape %}
 </div>
 {% endblock %}

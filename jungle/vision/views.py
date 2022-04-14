@@ -8,7 +8,7 @@ from .models import *
 class VisionDBForm(forms.ModelForm):
     class Meta:
         model = VisionDB
-        exclude = ('outjson',)
+        exclude = ('outjson','userdesc')
 
 
 def hello(request):
@@ -33,6 +33,7 @@ def hello(request):
         detector = BaseDetector()
     else:
         detector = YoloDetector(model_selection=str(img_obj.aimodel))
+        
     img, analysis = detector.readImage(source=img_obj.userimage.path, display=False)
 
     # image is rendered using base64 (not saved)
@@ -45,6 +46,7 @@ def hello(request):
     # save the result to VisionDB
     dbrecord = VisionDB.objects.get(pk=img_obj.id)
     dbrecord.outjson = str(analysis)
+    dbrecord.userdesc = "frontend action"
     dbrecord.save()
 
     return render(

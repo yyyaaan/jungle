@@ -1,43 +1,27 @@
 {% extends "parent.html" %}
 {% block title %}{{h1text}}{% endblock %}
-{% block header %}
-
+{% block head %}
+<style>
+    ul.errorlist {display: none;}
+</style>
 {% endblock %}
 {% block content %} 
-<div class="col s3">
+
+<div class="col m12 l3">
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
-        <!--
-        <form action="/vision/analyze" method="post" target="outputarea" >
-        <select>
-            <option value="" disabled selected>Select AI Model</option>
-            <option value="Azure">Azure</option>
-            <option value="mobilenet">MobileNet</option>
-            <option value="yolo">Yolo</option>
-        </select>
-        <input placeholder="Description" id="desc" type="text">
-        <div class = "file-field input-field">
-            <div class = "btn"><span>Browse</span><input type = "file" /></div>
-            <div class = "file-path-wrapper">
-               <input class = "file-path validate" type = "text" placeholder = "Upload file" />
-            </div>
-         </div>
-
-        <iframe id="outputarea" name="outputarea" width="100%" height="999px" style="border:none;"></iframe>
-
-        -->
         <button class="btn" type="submit">Analyze Picture</button>
     </form>
-    <p style="color: grey">{{debug}}</p>
+    <!--p style="color: grey">{{debug}}</p-->
+</div>
+<div class="col m12 l9">
+    {% if img_obj %}
+        <p>Uing AI model {{img_obj.aimodel}}</p>
+        <img width="100%" src="data:image/jpeg;base64, {{imgbytes}}"></img>
+        <pre>{{analysis}}</pre>
+    {% endif %}
 </div>
 
-<div class="col s9">
-{% if img_obj %}
-    <p>Succesfully uploaded : {{img_obj.userdesc}}, using AI model {{img_obj.aimodel}}</p>
-    <img width="100%" src="data:image/jpeg;base64, {{imgbytes}}"></img>
-    <pre>{{analysis}}</pre>
-{% endif %}
-</div>
 {% endblock %}
 
