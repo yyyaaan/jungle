@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-from os import environ, path
+from os import environ, path, getenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,9 +26,13 @@ MEDIA_ROOT = path.join(BASE_DIR, 'media/')
 SECRET_KEY = environ['djangosecret']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = (getenv("djangodebug") == None)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "35.228.1.223",
+    "127.0.0.1",
+    "new.yan.fi"
+]
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 
