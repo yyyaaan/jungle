@@ -23,9 +23,12 @@ def hello(request):
     form.save()
     img_obj = form.instance
 
+    print ("model", img_obj.aimodel)
     # Doing AI
     if img_obj.aimodel == "AZ": 
         detector = AZDetector()
+    elif img_obj.aimodel == "GCP": 
+        detector = GCPDetector()
     elif img_obj.aimodel == "mn": 
         detector = BaseDetector()
     else:
@@ -35,8 +38,14 @@ def hello(request):
     # image is rendered using base64 (not saved)
     _, frame_buff = cv2.imencode('.jpg', img) 
     b64img = b64encode(frame_buff).decode("UTF-8")
-    analysis = dumps(analysis, indent=4)
+    if type(analysis) == dict:
+        analysis = dumps(analysis, indent=4, default=str)
 
+
+    # save the result to VisionDB
+    dbrecord = VisionDB.objects.get(pk=img_obj.id)
+    dbrecord.outjson = str(analysis)
+    dbrecord.save()
 
     return render(
         request, 'vision/index.html', 

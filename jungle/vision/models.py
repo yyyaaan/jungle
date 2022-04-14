@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from requests import post
 from django.db import models
+from google.cloud import vision
 from logging import getLogger
 
 from commonlib.secretmanager import get_secret
@@ -21,6 +22,7 @@ class VisionDB(models.Model):
     aimodel = models.CharField("Vision Model Selection", max_length=100, choices=[
         ("Web API" , (
             ("AZ", "Azure Congnitive"),
+            ("GCP", "Google Cloud Vision"),
         )),
         ("Local", (
             ("mn", "Mobilenet"), 
@@ -30,6 +32,39 @@ class VisionDB(models.Model):
     ])
     outjson = models.TextField("Value (json as str)", max_length=65535, blank=True)
     timestamp = models.DateTimeField(auto_now=True)
+
+
+class GCPDetector:
+    def __init__(self):
+        self.client = vision.ImageAnnotatorClient()
+
+    def readImage(self, source, display=False):
+        image_data = open(source, "rb").read()
+
+        analysis = self.client. \
+            object_localization(image=vision.Image(content=image_data)). \
+            localized_object_annotations
+        color_map = {}
+        for objname in set([obj.name for obj in analysis]):
+            color_map[objname] = np.random.uniform(0, 255, size=3)
+
+        img = cv2.imread(source)
+        hh, ww, _ = img.shape
+        for obj in analysis:
+            label = obj.name
+            confidence = obj.score
+            color = color_map[obj.name]
+            pts = [[vertex.x * ww, vertex.y * hh] for vertex in obj.bounding_poly.normalized_vertices]
+            pts = np.array(pts, np.int32)
+            cv2.putText(img, f"{label} ({confidence:.2f})", (pts[0][0], pts[0][1]-10), cv2.FONT_HERSHEY_PLAIN, 1, color, 2)
+            cv2.polylines(img, [pts.reshape((-1, 1, 2))], True, color, 2)
+
+        if type(source) == str and display:
+            cv2.imshow("Google Cloud Vision", img)
+            cv2.waitKey(-1)
+        if not display:
+            return img, analysis
+        return img
 
 
 
@@ -52,6 +87,9 @@ class AZDetector:
         )
         response.raise_for_status()
         analysis = response.json()
+        color_map = {}
+        for objname in set([obj["object"] for obj in analysis["objects"]]):
+            color_map[objname] = np.random.uniform(0, 255, size=3)
 
         # use cv2 to display pic
         img = cv2.imread(source)
@@ -60,12 +98,12 @@ class AZDetector:
             x,y,w,h = obj["rectangle"].values()
             label = obj["object"]
             confidence = obj["confidence"]
-            color = (255, 255, 255)
+            color = color_map[label]
             cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
             cv2.putText(img, f"{label} ({confidence:.2f})", (x, y-10), cv2.FONT_HERSHEY_PLAIN, 1, color, 2)
 
         if type(source) == str and display:
-            cv2.imshow("MobileNet", img)
+            cv2.imshow("Azure Cognitive", img)
             cv2.waitKey(-1)
         if not display:
             return img, analysis
@@ -103,20 +141,21 @@ class BaseDetector:
         class_ids, confidences, bndboxes = self.net.detect(img, confThreshold = 0.4)
         nms_boxes = cv2.dnn.NMSBoxes(list(bndboxes), confidences, score_threshold=0.5, nms_threshold=0.2)
         
+        outjson = {"model": "mobilenet", "objects": []}
         for box_id in nms_boxes:
             confidence = confidences[box_id]
             label = self.classes[class_ids[box_id]]
             color = self.colors[class_ids[box_id]]
             x,y,w,h = bndboxes[box_id]
-
             cv2.rectangle(img, (x,y), (x+w, y+h), color=color, thickness=2)
             cv2.putText(img, f"{label} ({confidence:.2f})", (x, y-10), cv2.FONT_HERSHEY_PLAIN, 1, color, 2)
+            outjson["objects"].append({"label": label, "confidence": confidence, "bndbox": [x,y,w,h]})
 
         if type(source) == str and display:
             cv2.imshow("MobileNet", img)
             cv2.waitKey(-1)
         if not display:
-            return img, {}
+            return img, outjson
         return img
 
     def readVideo(self, video_src):
@@ -179,6 +218,7 @@ class YoloDetector:
 
         nms_boxes = cv2.dnn.NMSBoxes(bndboxes, confidences, 0.5, 0.4)
 
+        outjson = {"model": "mobilenet", "objects": []}
         for box_id in nms_boxes:
             x, y, w, h = bndboxes[box_id]
             label = str(self.classes[class_ids[box_id]])
@@ -186,12 +226,13 @@ class YoloDetector:
             color = self.colors[box_id]
             cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
             cv2.putText(img, f"{label} ({confidence:.2f})", (x, y-10), cv2.FONT_HERSHEY_PLAIN, 1, color, 2)
+            outjson["objects"].append({"label": label, "confidence": confidence, "bndbox": [x,y,w,h]})
 
         if type(source) == str and display:
             cv2.imshow("Yolo", img)
             cv2.waitKey(-1)
         if not display:
-            return img, {}
+            return img, outjson
         return img
             
 
