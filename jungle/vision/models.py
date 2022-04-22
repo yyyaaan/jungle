@@ -18,9 +18,9 @@ AI-Vision Models, is ai
 """
 
 class VisionDB(models.Model):
-    userimage = models.ImageField(upload_to ="vision/")
+    userimage = models.ImageField("Upload a picture", upload_to ="vision/")
     userdesc = models.CharField("User Description", max_length=1023, blank=True)
-    aimodel = models.CharField("Vision Model Selection", max_length=100, choices=[
+    aimodel = models.CharField("Select a vision model", max_length=100, choices=[
         ("Web API" , (
             ("AZ", "Azure Congnitive"),
             ("GCP", "Google Cloud Vision"),
@@ -85,7 +85,8 @@ class GCPDetector:
 
 class AZDetector:
 
-    def __init__(self, params={'visualFeatures': 'Categories,Description,Objects'}):
+    def __init__(self, params={'visualFeatures': 'Description,Brands,Objects', 'details': 'Celebrities,Landmarks'}):
+        # Categories, Color, ImageType can be added
         self.params = params
         self.azkey = get_secret("ycrawl-credentials", as_json=True)["AZURE_CV"]
         self.endpoint = "https://yyyazurecv.cognitiveservices.azure.com/vision/v3.2/analyze"

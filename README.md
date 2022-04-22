@@ -27,8 +27,9 @@ Single action is performed in `xxActionSerializer` class; job action group is do
 
 ## Deployment checklist
 
+> Known issues: the module `commonlib` has cross references to database, and thus make it impossible to perform migrations. Copy the sqlite database to imitate.
+
 - Environment variable for Django and Gcloud
-- yCrawl database
 - OTP token, service token etc.
 - SSH cert is a must to use Token Auth
 - Log settings config level

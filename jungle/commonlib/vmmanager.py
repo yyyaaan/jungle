@@ -1,7 +1,11 @@
 from json import dumps, loads
+from logging import getLogger
 
 from .secretmanager import *
+
 from ycrawl.models import VmRegistry
+
+logger = getLogger("commonlib")
 
 # changes from Flask project: print -> logger, all_vms from model format changed, messaging changed
 

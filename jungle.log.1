@@ -1,0 +1,375 @@
+2022-04-14 12:22:49,986 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 15746 4312237440 
+2022-04-21 11:19:12,753 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 9332 4378543488 
+2022-04-21 11:19:23,547 django.server INFO "GET / HTTP/1.1" 200 4506 | basehttp 9332 6129971200 
+2022-04-21 11:19:25,268 django.server INFO "GET /vision/ HTTP/1.1" 200 4409 | basehttp 9332 6129971200 
+2022-04-21 11:19:39,518 django.server INFO "POST /vision/ HTTP/1.1" 200 289761 | basehttp 9332 6129971200 
+2022-04-21 11:20:31,490 django.server INFO "POST /vision/ HTTP/1.1" 200 291333 | basehttp 9332 6129971200 
+2022-04-21 11:21:45,054 django.server INFO "POST /vision/ HTTP/1.1" 200 291416 | basehttp 9332 6129971200 
+2022-04-21 11:24:45,368 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/vision/models.py changed, reloading. | autoreload 9332 4378543488 
+2022-04-21 11:24:46,472 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 9592 4342400384 
+2022-04-21 11:25:06,893 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/vision/models.py changed, reloading. | autoreload 9592 4342400384 
+2022-04-21 11:25:08,034 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 9617 4307289472 
+2022-04-21 11:25:14,571 django.server INFO "POST /vision/ HTTP/1.1" 200 291701 | basehttp 9617 6202716160 
+2022-04-21 11:26:23,010 django.server INFO "POST /vision/ HTTP/1.1" 200 4288 | basehttp 9617 6202716160 
+2022-04-21 11:26:33,512 django.server INFO "POST /vision/ HTTP/1.1" 200 4288 | basehttp 9617 6202716160 
+2022-04-21 11:27:36,450 django.server INFO "POST /vision/ HTTP/1.1" 200 303866 | basehttp 9617 6202716160 
+2022-04-21 13:55:47,922 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13345 4298229120 
+2022-04-21 13:55:52,834 django.server INFO "GET /admin/ HTTP/1.1" 302 0 | basehttp 13345 6210433024 
+2022-04-21 13:55:52,865 django.server INFO "GET /admin/login/?next=/admin/ HTTP/1.1" 200 2807 | basehttp 13345 6210433024 
+2022-04-21 13:55:52,964 django.server INFO "GET /static/admin/css/base.css HTTP/1.1" 200 19513 | basehttp 13345 6210433024 
+2022-04-21 13:55:52,964 django.server INFO "GET /static/admin/css/login.css HTTP/1.1" 200 954 | basehttp 13345 6260912128 
+2022-04-21 13:55:52,964 django.server INFO "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2616 | basehttp 13345 6227259392 
+2022-04-21 13:55:52,965 django.server INFO "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3401 | basehttp 13345 6244085760 
+2022-04-21 13:55:52,966 django.server INFO "GET /static/admin/css/responsive.css HTTP/1.1" 200 18575 | basehttp 13345 6277738496 
+2022-04-21 13:55:52,966 django.server INFO "GET /static/admin/css/fonts.css HTTP/1.1" 200 423 | basehttp 13345 6210433024 
+2022-04-21 13:55:52,977 django.server INFO "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 200 85876 | basehttp 13345 6210433024 
+2022-04-21 13:55:52,992 django.server INFO "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 200 85692 | basehttp 13345 6210433024 
+2022-04-21 13:55:53,045 django.request WARNING Not Found: /favicon.ico | log 13345 6210433024 
+2022-04-21 13:55:53,046 django.request WARNING Not Found: /apple-touch-icon-precomposed.png | log 13345 6294564864 
+2022-04-21 13:55:53,046 django.server WARNING "GET /favicon.ico HTTP/1.1" 404 3205 | basehttp 13345 6210433024 
+2022-04-21 13:55:53,047 django.server WARNING "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 3268 | basehttp 13345 6294564864 
+2022-04-21 13:55:53,051 django.request WARNING Not Found: /apple-touch-icon.png | log 13345 6294564864 
+2022-04-21 13:55:53,051 django.server WARNING "GET /apple-touch-icon.png HTTP/1.1" 404 3232 | basehttp 13345 6294564864 
+2022-04-21 13:56:00,793 django.server INFO "GET /cv HTTP/1.1" 301 0 | basehttp 13345 6311391232 
+2022-04-21 13:56:00,839 django.request ERROR Internal Server Error: /cv/ | log 13345 6311391232 
+Traceback (most recent call last):
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/views.py", line 4, in cv
+    return render(request, 'yancv/cv.html', {"h1text": "Under Construction"})
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: yancv/cv.html
+2022-04-21 13:56:00,850 django.server ERROR "GET /cv/ HTTP/1.1" 500 79549 | basehttp 13345 6311391232 
+2022-04-21 13:56:44,600 django.server INFO "GET /cv/ HTTP/1.1" 200 3580 | basehttp 13345 6210433024 
+2022-04-21 13:59:07,004 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/admin.py changed, reloading. | autoreload 13345 4298229120 
+2022-04-21 13:59:08,109 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13468 4304422272 
+2022-04-21 13:59:37,933 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/vision/models.py changed, reloading. | autoreload 13468 4304422272 
+2022-04-21 13:59:39,014 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13545 4334306688 
+2022-04-21 13:59:45,890 django.server INFO "GET /admin/login/?next=/admin/ HTTP/1.1" 200 2807 | basehttp 13545 6172962816 
+2022-04-21 13:59:51,740 django.server INFO "GET /admin/login/?next=/admin/ HTTP/1.1" 200 2807 | basehttp 13545 6172962816 
+2022-04-21 13:59:55,763 django.server INFO "GET /vision HTTP/1.1" 301 0 | basehttp 13545 10754224128 
+2022-04-21 13:59:55,780 django.server INFO "GET /vision/ HTTP/1.1" 200 4416 | basehttp 13545 10754224128 
+2022-04-21 14:00:24,046 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/vision/models.py changed, reloading. | autoreload 13545 4334306688 
+2022-04-21 14:00:25,187 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13584 4337436032 
+2022-04-21 14:00:29,032 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/vision/models.py changed, reloading. | autoreload 13584 4337436032 
+2022-04-21 14:00:30,089 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13599 4371088768 
+2022-04-21 14:00:33,715 django.server INFO "GET /vision/ HTTP/1.1" 200 4415 | basehttp 13599 6183219200 
+2022-04-21 14:01:37,421 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/admin.py changed, reloading. | autoreload 13599 4371088768 
+2022-04-21 14:01:38,570 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13674 4303996288 
+2022-04-21 14:06:32,104 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/models.py changed, reloading. | autoreload 13674 4303996288 
+2022-04-21 14:06:33,163 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13867 4348659072 
+2022-04-21 14:07:15,907 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/models.py changed, reloading. | autoreload 13867 4348659072 
+2022-04-21 14:07:16,551 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13892 4300555648 
+2022-04-21 14:08:29,998 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/models.py changed, reloading. | autoreload 13892 4300555648 
+2022-04-21 14:08:30,607 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13918 4302062976 
+2022-04-21 14:08:32,801 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/models.py changed, reloading. | autoreload 13918 4302062976 
+2022-04-21 14:08:33,448 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13934 4345087360 
+2022-04-21 14:08:56,003 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/models.py changed, reloading. | autoreload 13934 4345087360 
+2022-04-21 14:08:56,605 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13963 4297475456 
+2022-04-21 14:09:07,940 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/models.py changed, reloading. | autoreload 13963 4297475456 
+2022-04-21 14:09:08,544 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 13976 4300146048 
+2022-04-21 14:09:20,642 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/models.py changed, reloading. | autoreload 13976 4300146048 
+2022-04-21 14:09:21,681 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 14001 4298360192 
+2022-04-21 14:09:57,806 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/admin.py changed, reloading. | autoreload 14001 4298360192 
+2022-04-21 14:09:58,808 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 14032 4339778944 
+2022-04-21 14:10:06,613 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/admin.py changed, reloading. | autoreload 14032 4339778944 
+2022-04-21 14:10:07,566 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 14053 4336092544 
+2022-04-21 14:10:26,846 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/admin.py changed, reloading. | autoreload 14053 4336092544 
+2022-04-21 14:10:27,846 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 14069 4341319040 
+2022-04-21 14:12:14,329 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 14170 4374250880 
+2022-04-21 14:12:19,593 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/models.py changed, reloading. | autoreload 14170 4374250880 
+2022-04-21 14:12:20,173 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 14186 4344792448 
+2022-04-21 14:12:24,452 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 14197 4308305280 
+2022-04-21 14:13:14,245 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 14241 4337632640 
+2022-04-21 14:14:51,422 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 14310 4377593216 
+2022-04-21 14:15:16,702 django.server INFO "GET / HTTP/1.1" 200 4514 | basehttp 14310 6131773440 
+2022-04-21 14:15:18,905 django.server INFO "GET /admin/ HTTP/1.1" 200 11925 | basehttp 14310 6131773440 
+2022-04-21 14:15:18,916 django.server INFO "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3401 | basehttp 14310 6165426176 
+2022-04-21 14:15:18,917 django.server INFO "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2616 | basehttp 14310 6148599808 
+2022-04-21 14:15:18,918 django.server INFO "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0 | basehttp 14310 10771050496 
+2022-04-21 14:15:18,918 django.server INFO "GET /static/admin/css/base.css HTTP/1.1" 200 19513 | basehttp 14310 6131773440 
+2022-04-21 14:15:18,919 django.server INFO "GET /static/admin/css/responsive.css HTTP/1.1" 200 18575 | basehttp 14310 10754224128 
+2022-04-21 14:15:19,479 django.server INFO "GET /admin/ HTTP/1.1" 200 11925 | basehttp 14310 10754224128 
+2022-04-21 14:15:19,506 django.server INFO "GET /static/admin/css/fonts.css HTTP/1.1" 304 0 | basehttp 14310 10754224128 
+2022-04-21 14:15:19,533 django.server INFO "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 304 0 | basehttp 14310 10754224128 
+2022-04-21 14:15:19,533 django.server INFO "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0 | basehttp 14310 10771050496 
+2022-04-21 14:15:19,535 django.server INFO "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0 | basehttp 14310 6131773440 
+2022-04-21 14:15:19,538 django.server INFO "GET /static/admin/fonts/Roboto-Bold-webfont.woff HTTP/1.1" 200 86184 | basehttp 14310 6165426176 
+2022-04-21 14:15:19,538 django.server INFO "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 200 85876 | basehttp 14310 10787876864 
+2022-04-21 14:15:19,538 django.server INFO "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 200 85692 | basehttp 14310 6148599808 
+2022-04-21 14:15:19,575 django.request WARNING Not Found: /favicon.ico | log 14310 6148599808 
+2022-04-21 14:15:19,575 django.server WARNING "GET /favicon.ico HTTP/1.1" 404 3205 | basehttp 14310 6148599808 
+2022-04-21 14:15:23,551 django.request ERROR Internal Server Error: /admin/yancv/cvcerts/ | log 14310 6148599808 
+Traceback (most recent call last):
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/backends/sqlite3/base.py", line 477, in execute
+    return Database.Cursor.execute(self, query, params)
+sqlite3.OperationalError: no such table: yancv_cvcerts
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/contrib/admin/options.py", line 683, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/views/decorators/cache.py", line 62, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/utils/decorators.py", line 133, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/contrib/admin/options.py", line 1926, in changelist_view
+    cl = self.get_changelist_instance(request)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/contrib/admin/options.py", line 831, in get_changelist_instance
+    return ChangeList(
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/contrib/admin/views/main.py", line 123, in __init__
+    self.get_results(request)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/contrib/admin/views/main.py", line 279, in get_results
+    result_count = paginator.count
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/utils/functional.py", line 49, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/core/paginator.py", line 96, in count
+    return c()
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/models/query.py", line 470, in count
+    return self.query.get_count(using=self.db)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/models/sql/query.py", line 552, in get_count
+    number = obj.get_aggregation(using, ["__count"])["__count"]
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/models/sql/query.py", line 537, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/models/sql/compiler.py", line 1361, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/backends/utils.py", line 103, in execute
+    return super().execute(sql, params)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/db/backends/sqlite3/base.py", line 477, in execute
+    return Database.Cursor.execute(self, query, params)
+django.db.utils.OperationalError: no such table: yancv_cvcerts
+2022-04-21 14:15:23,565 django.server ERROR "GET /admin/yancv/cvcerts/ HTTP/1.1" 500 173610 | basehttp 14310 6148599808 
+2022-04-22 12:18:42,135 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 9082 4367484288 
+2022-04-22 12:18:46,364 django.server INFO "GET / HTTP/1.1" 200 4514 | basehttp 9082 6140735488 
+2022-04-22 12:18:47,977 django.server INFO "GET /admin/ HTTP/1.1" 200 12333 | basehttp 9082 6140735488 
+2022-04-22 12:18:47,990 django.server INFO "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0 | basehttp 9082 6157561856 
+2022-04-22 12:18:47,991 django.server INFO "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0 | basehttp 9082 6208040960 
+2022-04-22 12:18:47,991 django.server INFO "GET /static/admin/css/base.css HTTP/1.1" 304 0 | basehttp 9082 6140735488 
+2022-04-22 12:18:47,991 django.server INFO "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0 | basehttp 9082 6191214592 
+2022-04-22 12:18:47,991 django.server INFO "GET /static/admin/css/responsive.css HTTP/1.1" 304 0 | basehttp 9082 6174388224 
+2022-04-22 12:18:48,325 django.server INFO "GET /admin/ HTTP/1.1" 200 12333 | basehttp 9082 6174388224 
+2022-04-22 12:18:48,340 django.server INFO "GET /static/admin/css/fonts.css HTTP/1.1" 304 0 | basehttp 9082 6174388224 
+2022-04-22 12:18:48,351 django.server INFO "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0 | basehttp 9082 6174388224 
+2022-04-22 12:18:48,351 django.server INFO "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0 | basehttp 9082 6191214592 
+2022-04-22 12:18:48,352 django.server INFO "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 304 0 | basehttp 9082 6140735488 
+2022-04-22 12:18:48,366 django.server INFO "GET /static/admin/fonts/Roboto-Regular-webfont.woff HTTP/1.1" 304 0 | basehttp 9082 6191214592 
+2022-04-22 12:18:48,366 django.server INFO "GET /static/admin/fonts/Roboto-Bold-webfont.woff HTTP/1.1" 304 0 | basehttp 9082 6140735488 
+2022-04-22 12:18:48,366 django.server INFO "GET /static/admin/fonts/Roboto-Light-webfont.woff HTTP/1.1" 304 0 | basehttp 9082 6174388224 
+2022-04-22 12:18:48,409 django.request WARNING Not Found: /favicon.ico | log 9082 6174388224 
+2022-04-22 12:18:48,409 django.server WARNING "GET /favicon.ico HTTP/1.1" 404 3205 | basehttp 9082 6174388224 
+2022-04-22 12:18:51,804 django.server INFO "GET /admin/yancv/cvcert/ HTTP/1.1" 200 9829 | basehttp 9082 6174388224 
+2022-04-22 12:18:51,825 django.server INFO "GET /static/admin/css/changelists.css HTTP/1.1" 200 6932 | basehttp 9082 6174388224 
+2022-04-22 12:18:51,826 django.server INFO "GET /static/admin/js/actions.js HTTP/1.1" 200 7872 | basehttp 9082 6224867328 
+2022-04-22 12:18:51,826 django.server INFO "GET /static/admin/js/core.js HTTP/1.1" 200 5698 | basehttp 9082 6208040960 
+2022-04-22 12:18:51,827 django.server INFO "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 5984 | basehttp 9082 6157561856 
+2022-04-22 12:18:51,831 django.server INFO "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0 | basehttp 9082 6208040960 
+2022-04-22 12:18:51,831 django.server INFO "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0 | basehttp 9082 6157561856 
+2022-04-22 12:18:51,832 django.server INFO "GET /static/admin/js/urlify.js HTTP/1.1" 200 7902 | basehttp 9082 6174388224 
+2022-04-22 12:18:51,834 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9082 6140735488 
+2022-04-22 12:18:51,836 django.server INFO "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 288580 | basehttp 9082 6191214592 
+2022-04-22 12:18:51,836 django.server INFO "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 232381 | basehttp 9082 6224867328 
+2022-04-22 12:18:51,852 django.server INFO "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0 | basehttp 9082 6224867328 
+2022-04-22 12:18:55,352 django.server INFO "GET /admin/yancv/cvcert/add/ HTTP/1.1" 200 14425 | basehttp 9082 6224867328 
+2022-04-22 12:18:55,366 django.server INFO "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 304 0 | basehttp 9082 6140735488 
+2022-04-22 12:18:55,367 django.server INFO "GET /static/admin/css/forms.css HTTP/1.1" 200 8878 | basehttp 9082 6224867328 
+2022-04-22 12:18:55,370 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9082 6191214592 
+2022-04-22 12:18:55,371 django.server INFO "GET /static/admin/js/change_form.js HTTP/1.1" 304 0 | basehttp 9082 6140735488 
+2022-04-22 12:18:55,372 django.server INFO "GET /static/admin/css/widgets.css HTTP/1.1" 200 11097 | basehttp 9082 6224867328 
+2022-04-22 12:19:24,424 django.server INFO "POST /admin/yancv/cvcert/add/ HTTP/1.1" 302 0 | basehttp 9082 6224867328 
+2022-04-22 12:19:24,452 django.server INFO "GET /admin/yancv/cvcert/ HTTP/1.1" 200 13056 | basehttp 9082 6224867328 
+2022-04-22 12:19:24,470 django.server INFO "GET /static/admin/img/icon-yes.svg HTTP/1.1" 304 0 | basehttp 9082 6140735488 
+2022-04-22 12:19:24,470 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9082 6224867328 
+2022-04-22 12:19:26,643 django.server INFO "GET /admin/yancv/cvexp/ HTTP/1.1" 200 9823 | basehttp 9082 6224867328 
+2022-04-22 12:19:26,666 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9082 6224867328 
+2022-04-22 12:19:28,205 django.server INFO "GET /admin/yancv/cvexp/add/ HTTP/1.1" 200 12880 | basehttp 9082 6224867328 
+2022-04-22 12:19:28,227 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9082 6224867328 
+2022-04-22 12:19:42,612 django.server INFO "POST /admin/yancv/cvexp/add/ HTTP/1.1" 302 0 | basehttp 9082 6224867328 
+2022-04-22 12:19:42,658 django.server INFO "GET /admin/yancv/cvexp/ HTTP/1.1" 200 12547 | basehttp 9082 6224867328 
+2022-04-22 12:19:42,677 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9082 6224867328 
+2022-04-22 12:19:42,677 django.server INFO "GET /static/admin/img/icon-no.svg HTTP/1.1" 200 560 | basehttp 9082 6140735488 
+2022-04-22 12:24:18,556 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 9520 4313269632 
+2022-04-22 12:24:22,129 django.server INFO "GET /admin/yancv/cvexp/ HTTP/1.1" 200 12341 | basehttp 9520 6173995008 
+2022-04-22 12:24:22,147 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9520 6173995008 
+2022-04-22 12:24:24,433 django.server INFO "GET /admin/yancv/cvcert/ HTTP/1.1" 200 22644 | basehttp 9520 6173995008 
+2022-04-22 12:24:24,451 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9520 6173995008 
+2022-04-22 12:24:32,634 django.server INFO "GET /admin/yancv/cvcert/title/change/ HTTP/1.1" 200 14799 | basehttp 9520 6173995008 
+2022-04-22 12:24:32,651 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9520 6173995008 
+2022-04-22 12:24:35,249 django.server INFO "POST /admin/yancv/cvcert/title/change/ HTTP/1.1" 302 0 | basehttp 9520 6173995008 
+2022-04-22 12:24:35,294 django.server INFO "GET /admin/yancv/cvcert/ HTTP/1.1" 200 22863 | basehttp 9520 6173995008 
+2022-04-22 12:24:35,307 django.server INFO "GET /admin/jsi18n/ HTTP/1.1" 200 3343 | basehttp 9520 6173995008 
+2022-04-22 12:43:48,476 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 10305 4367992192 
+2022-04-22 12:44:19,890 django.server INFO "GET /cv HTTP/1.1" 301 0 | basehttp 10305 6141112320 
+2022-04-22 12:44:19,906 django.server INFO "GET /cv/ HTTP/1.1" 200 31272 | basehttp 10305 6141112320 
+2022-04-22 12:44:19,978 django.request WARNING Not Found: /cv/static/images/google-data-analytics-certificate.png | log 10305 6157938688 
+2022-04-22 12:44:19,978 django.request WARNING Not Found: /cv/static/images/ibm-ai-engineering-professional-certificate.png | log 10305 6141112320 
+2022-04-22 12:44:19,979 django.server WARNING "GET /cv/static/images/google-data-analytics-certificate.png HTTP/1.1" 404 3395 | basehttp 10305 6157938688 
+2022-04-22 12:44:19,979 django.server WARNING "GET /cv/static/images/ibm-ai-engineering-professional-certificate.png HTTP/1.1" 404 3425 | basehttp 10305 6141112320 
+2022-04-22 12:44:19,982 django.request WARNING Not Found: /cv/static/images/azure-data-engineer.png | log 10305 6141112320 
+2022-04-22 12:44:19,983 django.server WARNING "GET /cv/static/images/azure-data-engineer.png HTTP/1.1" 404 3353 | basehttp 10305 6141112320 
+2022-04-22 12:44:19,986 django.request WARNING Not Found: /cv/static/images/azure-data-scientist.png | log 10305 6141112320 
+2022-04-22 12:44:19,986 django.server WARNING "GET /cv/static/images/azure-data-scientist.png HTTP/1.1" 404 3356 | basehttp 10305 6141112320 
+2022-04-22 12:44:19,989 django.request WARNING Not Found: /cv/static/images/azure-ai-engineer.png | log 10305 6141112320 
+2022-04-22 12:44:19,989 django.server WARNING "GET /cv/static/images/azure-ai-engineer.png HTTP/1.1" 404 3347 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,004 django.request WARNING Not Found: /cv/static/images/thumbnail/msc_stat.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,005 django.server WARNING "GET /cv/static/images/thumbnail/msc_stat.jpg HTTP/1.1" 404 3350 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,009 django.request WARNING Not Found: /cv/static/images/thumbnail/msc_econ.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,009 django.server WARNING "GET /cv/static/images/thumbnail/msc_econ.jpg HTTP/1.1" 404 3350 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,013 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~WKRFNRRR8YYY.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,013 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~WKRFNRRR8YYY.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,016 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~5VNYW898L2X9.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,016 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~5VNYW898L2X9.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,020 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3ATD54NQQ74.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,020 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3ATD54NQQ74.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,023 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~3B9PVVBSANNS.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,023 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~3B9PVVBSANNS.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,028 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3X88XPBDWQC.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,028 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3X88XPBDWQC.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,032 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~H7EKZL2N3BKR.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,032 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~H7EKZL2N3BKR.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,036 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~ZDZNN7YTWMU4.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,036 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~ZDZNN7YTWMU4.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,040 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~X6SMHCN6VM73.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,040 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~X6SMHCN6VM73.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,044 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~629H5B983QTX.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,044 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~629H5B983QTX.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:44:20,047 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~FXFS2CDJUK2Q.jpg | log 10305 6141112320 
+2022-04-22 12:44:20,047 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~FXFS2CDJUK2Q.jpg HTTP/1.1" 404 3437 | basehttp 10305 6141112320 
+2022-04-22 12:46:04,658 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/views.py changed, reloading. | autoreload 10305 4367992192 
+2022-04-22 12:46:05,620 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 10375 4296000896 
+2022-04-22 12:46:24,748 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/views.py changed, reloading. | autoreload 10375 4296000896 
+2022-04-22 12:46:25,803 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 10392 4335699328 
+2022-04-22 12:48:21,811 django.request ERROR Internal Server Error: /cv/ | log 10392 10754224128 
+Traceback (most recent call last):
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/views.py", line 6, in cv
+    return render(request, 'yancv/cv.html', {
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/backends/django.py", line 34, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/engine.py", line 176, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/engine.py", line 158, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/base.py", line 514, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+  File "/Users/pannnyan/Documents/DevGit/jungle/.venv/lib/python3.8/site-packages/django/template/base.py", line 531, in extend_nodelist
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: <ExtendsNode: extends "parent.html"> must be the first tag in the template.
+2022-04-22 12:48:21,822 django.server ERROR "GET /cv/ HTTP/1.1" 500 133884 | basehttp 10392 10754224128 
+2022-04-22 12:48:45,224 django.server INFO "GET /cv/ HTTP/1.1" 200 31209 | basehttp 10392 10754224128 
+2022-04-22 12:48:45,263 django.request WARNING Not Found: /cv/static/images/ibm-ai-engineering-professional-certificate.png | log 10392 10754224128 
+2022-04-22 12:48:45,269 django.request WARNING Not Found: /cv/static/images/google-data-analytics-certificate.png | log 10392 10771050496 
+2022-04-22 12:48:45,273 django.server WARNING "GET /cv/static/images/google-data-analytics-certificate.png HTTP/1.1" 404 3395 | basehttp 10392 10771050496 
+2022-04-22 12:48:45,274 django.server WARNING "GET /cv/static/images/ibm-ai-engineering-professional-certificate.png HTTP/1.1" 404 3425 | basehttp 10392 10754224128 
+2022-04-22 12:48:45,275 django.request WARNING Not Found: /cv/static/images/azure-ai-engineer.png | log 10392 10821529600 
+2022-04-22 12:48:45,276 django.request WARNING Not Found: /cv/static/images/azure-data-engineer.png | log 10392 10787876864 
+2022-04-22 12:48:45,278 django.request WARNING Not Found: /cv/static/images/thumbnail/msc_stat.jpg | log 10392 10838355968 
+2022-04-22 12:48:45,279 django.server WARNING "GET /cv/static/images/azure-ai-engineer.png HTTP/1.1" 404 3347 | basehttp 10392 10821529600 
+2022-04-22 12:48:45,281 django.request WARNING Not Found: /cv/static/images/azure-data-scientist.png | log 10392 10804703232 
+2022-04-22 12:48:45,284 django.server WARNING "GET /cv/static/images/thumbnail/msc_stat.jpg HTTP/1.1" 404 3350 | basehttp 10392 10838355968 
+2022-04-22 12:48:45,285 django.server WARNING "GET /cv/static/images/azure-data-engineer.png HTTP/1.1" 404 3353 | basehttp 10392 10787876864 
+2022-04-22 12:48:45,285 django.server WARNING "GET /cv/static/images/azure-data-scientist.png HTTP/1.1" 404 3356 | basehttp 10392 10804703232 
+2022-04-22 12:48:45,288 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~5VNYW898L2X9.jpg | log 10392 10821529600 
+2022-04-22 12:48:45,290 django.request WARNING Not Found: /cv/static/images/thumbnail/msc_econ.jpg | log 10392 10771050496 
+2022-04-22 12:48:45,291 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~WKRFNRRR8YYY.jpg | log 10392 10754224128 
+2022-04-22 12:48:45,293 django.server WARNING "GET /cv/static/images/thumbnail/msc_econ.jpg HTTP/1.1" 404 3350 | basehttp 10392 10771050496 
+2022-04-22 12:48:45,293 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~5VNYW898L2X9.jpg HTTP/1.1" 404 3437 | basehttp 10392 10821529600 
+2022-04-22 12:48:45,295 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3ATD54NQQ74.jpg | log 10392 10787876864 
+2022-04-22 12:48:45,295 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~3B9PVVBSANNS.jpg | log 10392 10804703232 
+2022-04-22 12:48:45,296 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~WKRFNRRR8YYY.jpg HTTP/1.1" 404 3437 | basehttp 10392 10754224128 
+2022-04-22 12:48:45,297 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3X88XPBDWQC.jpg | log 10392 10838355968 
+2022-04-22 12:48:45,302 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~3B9PVVBSANNS.jpg HTTP/1.1" 404 3437 | basehttp 10392 10804703232 
+2022-04-22 12:48:45,303 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3ATD54NQQ74.jpg HTTP/1.1" 404 3437 | basehttp 10392 10787876864 
+2022-04-22 12:48:45,304 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~ZDZNN7YTWMU4.jpg | log 10392 10771050496 
+2022-04-22 12:48:45,305 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~X6SMHCN6VM73.jpg | log 10392 10754224128 
+2022-04-22 12:48:45,305 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3X88XPBDWQC.jpg HTTP/1.1" 404 3437 | basehttp 10392 10838355968 
+2022-04-22 12:48:45,305 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~H7EKZL2N3BKR.jpg | log 10392 10821529600 
+2022-04-22 12:48:45,308 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~ZDZNN7YTWMU4.jpg HTTP/1.1" 404 3437 | basehttp 10392 10771050496 
+2022-04-22 12:48:45,308 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~X6SMHCN6VM73.jpg HTTP/1.1" 404 3437 | basehttp 10392 10754224128 
+2022-04-22 12:48:45,309 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~629H5B983QTX.jpg | log 10392 10804703232 
+2022-04-22 12:48:45,309 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~H7EKZL2N3BKR.jpg HTTP/1.1" 404 3437 | basehttp 10392 10821529600 
+2022-04-22 12:48:45,309 django.server INFO "GET /static/yancv/thumbnails/FXFS2CDJUK2Q.jpg HTTP/1.1" 200 8798 | basehttp 10392 10787876864 
+2022-04-22 12:48:45,310 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~629H5B983QTX.jpg HTTP/1.1" 404 3437 | basehttp 10392 10804703232 
+2022-04-22 12:48:48,739 django.server WARNING "GET /static/yancv/images/FXFS2CDJUK2Q.jpeg HTTP/1.1" 404 1849 | basehttp 10392 10804703232 
+2022-04-22 12:48:50,423 django.server WARNING "GET /static/yancv/images/FXFS2CDJUK2Q.jpeg HTTP/1.1" 404 1849 | basehttp 10392 10787876864 
+2022-04-22 12:48:55,622 django.server WARNING "GET /static/yancv/images/FXFS2CDJUK2Q.jpeg HTTP/1.1" 404 1849 | basehttp 10392 10821529600 
+2022-04-22 12:49:42,655 django.server INFO "GET /cv/ HTTP/1.1" 200 31214 | basehttp 10392 10754224128 
+2022-04-22 12:49:42,691 django.request WARNING Not Found: /cv/static/images/azure-data-scientist.png | log 10392 10787876864 
+2022-04-22 12:49:42,692 django.request WARNING Not Found: /cv/static/images/azure-data-engineer.png | log 10392 10838355968 
+2022-04-22 12:49:42,693 django.request WARNING Not Found: /cv/static/images/azure-ai-engineer.png | log 10392 10804703232 
+2022-04-22 12:49:42,694 django.request WARNING Not Found: /cv/static/images/google-data-analytics-certificate.png | log 10392 10771050496 
+2022-04-22 12:49:42,694 django.request WARNING Not Found: /cv/static/images/ibm-ai-engineering-professional-certificate.png | log 10392 10754224128 
+2022-04-22 12:49:42,694 django.server WARNING "GET /cv/static/images/azure-data-scientist.png HTTP/1.1" 404 3356 | basehttp 10392 10787876864 
+2022-04-22 12:49:42,695 django.server WARNING "GET /cv/static/images/azure-data-engineer.png HTTP/1.1" 404 3353 | basehttp 10392 10838355968 
+2022-04-22 12:49:42,697 django.server WARNING "GET /cv/static/images/azure-ai-engineer.png HTTP/1.1" 404 3347 | basehttp 10392 10804703232 
+2022-04-22 12:49:42,699 django.request WARNING Not Found: /cv/static/images/thumbnail/msc_stat.jpg | log 10392 10821529600 
+2022-04-22 12:49:42,699 django.server WARNING "GET /cv/static/images/google-data-analytics-certificate.png HTTP/1.1" 404 3395 | basehttp 10392 10771050496 
+2022-04-22 12:49:42,700 django.server WARNING "GET /cv/static/images/ibm-ai-engineering-professional-certificate.png HTTP/1.1" 404 3425 | basehttp 10392 10754224128 
+2022-04-22 12:49:42,705 django.server WARNING "GET /cv/static/images/thumbnail/msc_stat.jpg HTTP/1.1" 404 3350 | basehttp 10392 10821529600 
+2022-04-22 12:49:42,709 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~WKRFNRRR8YYY.jpg | log 10392 10787876864 
+2022-04-22 12:49:42,713 django.request WARNING Not Found: /cv/static/images/thumbnail/msc_econ.jpg | log 10392 10838355968 
+2022-04-22 12:49:42,715 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~5VNYW898L2X9.jpg | log 10392 10804703232 
+2022-04-22 12:49:42,715 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~WKRFNRRR8YYY.jpg HTTP/1.1" 404 3437 | basehttp 10392 10787876864 
+2022-04-22 12:49:42,718 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~5VNYW898L2X9.jpg HTTP/1.1" 404 3437 | basehttp 10392 10804703232 
+2022-04-22 12:49:42,718 django.server WARNING "GET /cv/static/images/thumbnail/msc_econ.jpg HTTP/1.1" 404 3350 | basehttp 10392 10838355968 
+2022-04-22 12:49:42,720 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3ATD54NQQ74.jpg | log 10392 10771050496 
+2022-04-22 12:49:42,722 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3X88XPBDWQC.jpg | log 10392 10821529600 
+2022-04-22 12:49:42,723 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~3B9PVVBSANNS.jpg | log 10392 10754224128 
+2022-04-22 12:49:42,723 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3ATD54NQQ74.jpg HTTP/1.1" 404 3437 | basehttp 10392 10771050496 
+2022-04-22 12:49:42,727 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~H7EKZL2N3BKR.jpg | log 10392 10787876864 
+2022-04-22 12:49:42,727 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~D3X88XPBDWQC.jpg HTTP/1.1" 404 3437 | basehttp 10392 10821529600 
+2022-04-22 12:49:42,728 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~3B9PVVBSANNS.jpg HTTP/1.1" 404 3437 | basehttp 10392 10754224128 
+2022-04-22 12:49:42,729 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~ZDZNN7YTWMU4.jpg | log 10392 10838355968 
+2022-04-22 12:49:42,730 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~X6SMHCN6VM73.jpg | log 10392 10804703232 
+2022-04-22 12:49:42,731 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~H7EKZL2N3BKR.jpg HTTP/1.1" 404 3437 | basehttp 10392 10787876864 
+2022-04-22 12:49:42,731 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~ZDZNN7YTWMU4.jpg HTTP/1.1" 404 3437 | basehttp 10392 10838355968 
+2022-04-22 12:49:42,732 django.request WARNING Not Found: /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~629H5B983QTX.jpg | log 10392 10771050496 
+2022-04-22 12:49:42,732 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~X6SMHCN6VM73.jpg HTTP/1.1" 404 3437 | basehttp 10392 10804703232 
+2022-04-22 12:49:42,732 django.server WARNING "GET /cv/static/images/thumbnail/CERTIFICATE_LANDING_PAGE~629H5B983QTX.jpg HTTP/1.1" 404 3437 | basehttp 10392 10771050496 
+2022-04-22 12:49:45,020 django.server INFO "GET /static/yancv/images/full/FXFS2CDJUK2Q.jpeg HTTP/1.1" 200 464179 | basehttp 10392 10771050496 
+2022-04-22 12:51:37,668 django.utils.autoreload INFO /Users/pannnyan/Documents/DevGit/jungle/jungle/yancv/views.py changed, reloading. | autoreload 10392 4335699328 
+2022-04-22 12:51:38,705 django.utils.autoreload INFO Watching for file changes with StatReloader | autoreload 10584 4345202048 

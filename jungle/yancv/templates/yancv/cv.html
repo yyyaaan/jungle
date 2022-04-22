@@ -1,0 +1,356 @@
+{% extends "parent.html" %}
+{% load static %}
+
+{% block title %}{{h1text}}{% endblock %}
+
+{% block head %}
+<script src="https://kit.fontawesome.com/98be66497e.js" crossorigin="anonymous"></script>
+<script>
+function expandAllAcademics() {
+    $("#btn-a2").fadeIn();  $("#btn-a1").fadeOut();
+    var instance = M.Collapsible.getInstance($("#cert-academic > .collapsible"));
+    for (var i = 1; i < instance.$el[0].children.length; i++) instance.open(i);
+  }
+  
+  function collapseAllAcademics() {
+    $("#btn-a1").fadeIn();  $("#btn-a2").fadeOut();
+    var instance = M.Collapsible.getInstance($("#cert-academic > .collapsible"));
+    for (var i = 1; i < instance.$el[0].children.length; i++) instance.close(i);
+  }
+  
+  function expandAllSpecializations() {
+    $("#btn-b2").fadeIn();  $("#btn-b1").fadeOut();
+    var instance = M.Collapsible.getInstance($("#cert-specializations > .collapsible"));
+    for (var i = 1; i < instance.$el[0].children.length; i++) instance.open(i);
+  }
+  
+  function collapseAllSpecializations() {
+    $("#btn-b1").fadeIn();  $("#btn-b2").fadeOut();
+    var instance = M.Collapsible.getInstance($("#cert-specializations > .collapsible"));
+    for (var i = 1; i < instance.$el[0].children.length; i++) instance.close(i);
+  }
+</script>
+<style>
+@media print {    
+  footer, #toast-container, #the-menu, #certificates, #workflow{
+    display: none !important;
+  }
+}
+.collapsible-header > .btn-flat {
+  width: 99%;
+}
+.card-content > div > p {
+  padding: 8px;
+}
+h2 {
+  font-size: 2.2rem;
+  font-weight: 500;
+}
+h5{
+  font-size: 1.33rem;
+}
+#toast-container {
+  bottom: auto !important;
+  left: 50px;
+  top: 1%;
+  right: auto !important;  
+}
+.tap-target {
+  background-color: lightgrey;
+  width: 60%;
+  height: 60%;
+}
+.row {
+  margin-bottom: 0px;
+}
+.the-skill {
+  border: solid lightblue;
+  padding: 3px 10px 3px 10px;
+}
+.left-border{
+  border-left: #03a9f4 solid 5px;
+  padding-left: 30px;
+}
+#decorative > .dec-1 {
+   border-top: #aa96da solid 3px;
+}
+#decorative > .dec-2 {
+   border-top: #c5fad5 solid 3px;
+}
+#decorative > .dec-3 {
+   border-top: #ffeb59 solid 3px;
+}
+.icon-block-1 > h5 > i {
+  color: #aa96da;
+  font-size: 33px;
+}
+.icon-block-2 > h5 > i {
+  color: #c5fad5;
+  font-size: 33px;
+}
+.icon-block-3 > h5 > i {
+  color: #ffeb59;
+  font-size: 33px;
+}
+.icon-block-1 > h5.center {
+  text-decoration: underline double #aa96da;
+}
+.icon-block-2 > h5.center {
+  text-decoration: underline double #c5fad5;
+}
+.icon-block-3 > h5.center {
+  text-decoration: underline double #ffeb59;
+}
+/*Light Purple (#D7A9E3FF), Light Blue (#8BBEE8FF) and Light Green (#A8D5BAFF)*/
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="col s1">
+</div>
+
+<div class="col s3">
+    <h2 style="color:transparent">Thank You!</h2>
+    <p class="mono">
+        <a href="mailto:yan@yan.fi"><i class="material-icons">email</i> yan@yan.fi</a><br>
+        <a href="#!"><i class="material-icons">phone</i> +358 44 9199 857</a><br>
+        <a href="#!"><i class="material-icons">place</i> Helsinki, FI-00340</a><br>
+        <a href="http://cv.yan.fi"><i class="material-icons">developer_board</i> More details at cv.yan.fi</a>
+    </p>
+</div>
+
+<div class="col s8 left-border">
+    <h2 class="mono">YAN PAN</h2>
+    <p>Tech-minded data scientist with passion<br>
+        M.Sc. Statistics | M.Sc. Economics | <span class="tooltipped" data-position="top"
+            data-tooltip="DeepLearning.AI TensorFlow Developer professional certificate<br/>Google data analytics professional certificate<br/>IBM AI engineering professional certificate">Certified
+            AI Engineer, Data Analyst and TensorFlow Programmer..</span></p>
+    <p>
+        <a class="btn-flat light-blue lighten-5" href="http://yan.fi"><i class="fas fa-laptop-house"
+                aria-hidden="true"></i> https://yan.fi</a>
+        <a class="btn-flat light-blue lighten-5" target="_blank" href="https://www.kaggle.com/yyyaaan"><i
+                class="fab fa-kaggle" aria-hidden="true"></i> kaggle.com/yyyaaan</a>
+        <a class="btn-flat light-blue lighten-5" target="_blank" href="https://github.com/yyyaaan"><i
+                class="fab fa-github" aria-hidden="true"></i> github.com/yyyaaan</a>
+    </p>
+</div>
+{% endblock %}
+
+
+{% block contentmore %}
+<div class="col s3 m3">
+    <div class="icon-block icon-block-1">
+        <h5 class="center"><i class="material-icons">whatshot</i><br>True Passion</h5>
+        <p class="light">A passionate team contributor backeded with agility and innovation.</p>
+        <p>True love in coding<br><span class="light">Track record of responsible programming and nice documentation.
+                Purse high performance, code asethetics and reusability.</span></p>
+        <p>True passion in solving real-world problem<br><span class="light">Proven efficiency in solving problems with
+                by evaluating algorithm and flow. Commit to data janitor and quality control.</span></p>
+        <p>True belief in technology<br><span class="light">Eager for new challenges, hunger for new knowledge and ready
+                for new techonology.</span></p>
+    </div>
+</div>
+
+<div class="col s3 m3">
+    <div class="icon-block icon-block-2">
+        <h5 class="center"><i class="material-icons">widgets</i><br>Authentic Skills</h5>
+
+        <p class="light">On daily basis, I use SQL, Python, R, SAS together with supportive tools including NodeJS,
+            Git/SVN, Bash, HTML/CSS. Proven capability in multilingual environments with seemless language transition.
+        </p>
+        <p> <span class="the-skill">SQL</span> <span class="the-skill">Python+R</span> <span class="the-skill">Cloud
+                AI/ML</span> </p>
+        <p class="light">
+            Task-oriented skillset<br>
+            &gt; Data engineering/manuplating: SQL, Bash<br>
+            &gt; Statistical modelling/learning: R, SAS<br>
+            &gt; Deep learning: Python with TF/Keras<br>
+            &gt; Dashboard: DataStudio/PowerBI, Plotly, HTML/css<br>
+            &gt; Data streaming/warehousing: BigQuery-SQL/Cosmos<br>
+            &gt; Serverless: NodeJS, Python on GCP
+        </p>
+        <p class="center-align">
+            <a target="_blank" href="https://www.credly.com/badges/0721ee37-cb4f-431d-80dc-4adba87e490b/public_url"><img
+                    height="50" src="/static/yancv/images/ibm-ai-engineering-professional-certificate.png"></a>
+            <a target="_blank" href="https://www.credly.com/badges/b080c9df-096e-4320-b582-bbedaf5e4bad/public_url"><img
+                    height="50" src="/static/yancv/images/google-data-analytics-certificate.png"></a>
+            <a target="_blank" href="https://www.credly.com/badges/385a5380-5768-4894-9632-5f6c659a073f/public_url"><img
+                    height="50" src="/static/yancv/images/azure-data-engineer.png"></a>
+            <a target="_blank" href="https://www.credly.com/badges/74c7b935-6193-4280-9a51-7cd53f6ca7da/public_url"><img
+                    height="50" src="/static/yancv/images/azure-data-scientist.png"></a>
+            <a target="_blank" href="https://www.credly.com/badges/f4d6393a-f54e-413f-90dd-4abdcaa17b62/public_url"><img
+                    height="50" src="/static/yancv/images/azure-ai-engineer.png"></a>
+        </p>
+
+    </div>
+</div>
+
+<div class="col s6 m6">
+    <div class="icon-block icon-block-3">
+        <h5 class="center"><i class="material-icons">work</i><br>Accumulated Expertise</h5>
+
+        <p class="light">
+            Expertise is rooted from strong academic background and rich expereinces across multiple industry sectors.
+            Philosophy: learn, improve and enjoy from daily work.
+        </p>
+        <div class="collection">
+            <div class="collection-item">
+                Clinical Data Engineer <br>
+                <span class="light">
+                    Bayer | (2021)<br>
+                    Data engineering at large scale from varied sources, requiring strong focus on data lineage and
+                    traceability on a private cloud; main language is PL/SQL supported by Python.
+                </span>
+            </div>
+            <div class="collection-item">
+                Data Scientist (Statistical Analysis Programming) + Tool&amp;Tech Dev Team <br>
+                <span class="light">
+                    IQVIA, expert service to Novartis | (2018 ~ 2021)<br>
+                    Full data life-cycle from loading to reporting. Highlighted with materialize academic paper to
+                    production algorithm; &gt; 30% work time assigned to Tool&amp;Tech Dev Team, developing and
+                    promoting automated data workflow under hybrid specialty cloud infrastructure (AIX Win/Unix)
+                </span>
+            </div>
+            <div class="collection-item">
+                Dual Master Studies with solid records at University of Jyväskylä<br>
+                <span class="light">&gt; M.Sc. Statistics (2018 ~ 2020)<br>&gt; M.Sc. Business and Economics (2014 ~
+                    2018)</span>
+            </div>
+            <div class="collection-item">
+                Product Coordinator: System Expert, Key BI Developer<br>
+                <span class="light">SantaPark Oy, Rovaniemi (May 2016 ~ Nov 2018)</span>
+            </div>
+            <div class="collection-item">
+                HR Analyst: training, internal finance and workforce analyst<br>
+                <span class="light">Bank of Shanghai (Jul 2011 ~ Jun 2014)</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block contentevenmore %}
+<div id="cert-academic" class="col m12 l5 offset-l1">
+    <ul class="collapsible z-depth-0">
+        <li>
+            <div class="collapsible-header" tabindex="0">
+                <a id="btn-a1" class="btn-flat" onclick="expandAllAcademics();"><i
+                        class="material-icons right">expand_more</i>Academic <small>(click to expand)</small></a>
+                <a id="btn-a2" class="btn-flat" onclick="collapseAllAcademics();" style="display: none;"><i
+                        class="material-icons right">expand_less</i>Academic</a>
+            </div>
+        </li>
+        <li class="active">
+            <div class="collapsible-header" tabindex="0"><i class="material-icons">school</i>M.Sc. Statistics<span
+                    class="badge deep-orange lighten-4" data-badge-caption="ECTs">122</span></div>
+            <div class="collapsible-body row" style="display: block;">
+                <div class="col s9">
+                    <p>Filosofian maisterin tutkinto - tilastotieteen maisteriohjelma<br>Subject studies completed
+                        partially in Finnish <i>(Grade: Very Good/Kiitetävä)</i></p>
+                    <p>Thesis: <a href="https://jyx.jyu.fi/handle/123456789/68203">Time-Varying Source Separation by
+                            Joint Diagonlization on Autocovariances </a><i>(Grade: Very Good/Kiitetävä)</i></p>
+                    <img height="60px" ,=""
+                        src="https://www.jyu.fi/fi/yliopistopalvelut/viestintapalvelut/logot/jyu-vaaka-kaksikielinen.jpg">
+                </div>
+                <div class="col s3">
+                    <div class="material-placeholder"><img class="materialboxed" width="99%"
+                            src="/static/yancv/thumbnails/msc_stat.jpg"
+                            data-enlarge-image="/static/yancv/images/msc_stat.png"></div>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div class="collapsible-header" tabindex="0"><i class="material-icons">business_center</i>M.Sc. Economics
+                and Business Administration<span class="badge deep-orange lighten-4"
+                    data-badge-caption="ECTs">132</span></div>
+            <div class="collapsible-body row">
+                <div class="col s9">
+                    <p>Master of Science (Economics and Business Administration<br>Subject studies completed in
+                        English<i>(Grade: Very Good)</i></p>
+                    <p>Thesis: <a href="https://jyx.jyu.fi/handle/123456789/60668">Innovation in Complex Adaptive
+                            System: an exploratory study in mobile phone industry </a><i>(Grade: Good)</i></p>
+                </div>
+                <div class="col s3">
+                    <div class="material-placeholder"><img class="materialboxed" width="99%"
+                            src="/static/yancv/thumbnails/msc_econ.jpg"
+                            data-enlarge-image="/static/yancv/images/msc_econ.png"></div>
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="collapsible-header" tabindex="0"><i class="material-icons">library_books</i>Publications and
+                Researches</div>
+            <div class="collapsible-body">
+                <p>Pan, Y., Matilainen, M., Taskinen, S., &amp; Nordhausen, K. (2021). A review of second‐order blind
+                    identification methods. <i>Wiley Interdisciplinary Reviews: Computational Statistics</i>, e1550. <a
+                        href="https://onlinelibrary.wiley.com/doi/full/10.1002/wics.1550">doi:10.1002/wics.1550</a> </p>
+                <p>Check out my homepage <a href="http://yan.fi">yan.fi</a> for funny real-life projects</p>
+            </div>
+        </li>
+    </ul>
+
+    <p class="right-align"><a class="waves-effect waves-light btn-flat" onclick="collapseAllAcademics();"><i
+                class="material-icons right">fullscreen_exit</i>Collapse All</a></p>
+    <p>
+
+    </p>
+    <p style="margin-top:50px; text-align:center;"><a href="#workflow">How my data workflow works? Check here</a></p>
+
+
+</div>
+
+<div id="cert-specializations" class="col m12 l5">
+    <ul class="collapsible z-depth-0">
+        <li>
+            <div class="collapsible-header" tabindex="0">
+                <a id="btn-b1" class="btn-flat" onclick="expandAllSpecializations();"><i
+                        class="material-icons right">expand_more</i>Certfications &amp; Specializations <small>(click to
+                        expand)</small></a>
+                <a id="btn-b2" class="btn-flat" onclick="collapseAllSpecializations();" style="display: none;"><i
+                        class="material-icons right">expand_less</i>Certfications &amp; Specializations</a>
+            </div>
+        </li>
+
+        {% for cert in certs %}
+        <li>
+            <div class="collapsible-header" tabindex="0">
+                {% autoescape off %}{{cert.icon_tag}}{% endautoescape %}
+                {{cert.title}} <small> {{cert.title_extra}}</small>
+                <span class="badge blue lighten-5" data-badge-caption="courses"> {{cert.n_courses}}</span>
+            </div>
+
+            <div class="collapsible-body row">
+                <div class="col s5">
+                    <!--'{% static "yancv/thumbnails/{{cert.imgname}}" %}'-->
+                    <div class="material-placeholder"><img class="materialboxed" width="99%"
+                        src="/static/yancv/thumbnails/{{cert.imgname}}"
+                        data-enlarge-image="/static/yancv/images/{{cert.imgname}}">
+                    </div>
+                    <p class="center-align">
+                        tap to enlarge<br>
+                        <a target="_blank" href="{{cert.verify_link}}"><i class="material-icons tiny">open_in_new</i> Verify</a>
+                    </p>
+                </div>
+                <div class="col s7">
+                    <p>by <i>{{cert.issuer}}</i></p>
+                    <ul class="browser-default">
+                        {% for course in cert.courses_as_list %}
+                        <li>{{course}}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <p class="right-align"><a class="waves-effect waves-light btn-flat" onclick="collapseAllSpecializations();"><i
+                class="material-icons right">fullscreen_exit</i>Collapse All</a></p>
+    <p>
+
+    </p>
+</div>
+{% endblock %}

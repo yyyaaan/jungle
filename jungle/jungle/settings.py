@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'ycrawl',
     'frontend',
     'vision',
+    'yancv',
     'rest_framework',
     'rest_framework.authtoken',
     'django_otp',

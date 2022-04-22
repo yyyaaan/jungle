@@ -21,6 +21,7 @@ admin.site.__class__ = OTPAdminSite
 
 urlpatterns = [
     path('', include("frontend.urls")),
+    path('cv/', include("yancv.urls")),
     path('ycrawl/', include("ycrawl.urls")),
     path('play/', include("play.urls")),
     path('vision/', include("vision.urls")),

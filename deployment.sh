@@ -50,13 +50,15 @@ server {
     server_name $domain;
     client_max_body_size 100M;
 
+    location /static/ {
+        alias /home/yan/jungle/jungle/staticfiles/;
+    }
     location / {
         include proxy_params;
         proxy_pass http://unix:/home/yan/jungle/jungle/jungle.sock;
     }
-}s
+}
 EOT
 
 sudo certbot --nginx -d $domain
-
-# cron job to be done
+sudo chown -R :www-data /home/yan/jungle/jungle/staticfiles/

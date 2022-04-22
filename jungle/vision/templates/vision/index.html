@@ -17,11 +17,20 @@
 </div>
 <div class="col m12 l9">
     {% if img_obj %}
-        <p>Uing AI model {{img_obj.aimodel}}</p>
+        <p>Using AI model {{img_obj.aimodel}}</p>
         <img width="100%" src="data:image/jpeg;base64, {{imgbytes}}"></img>
-        <pre>{{analysis}}</pre>
+        <ul class="collapsible popout"><li>
+            <div class="collapsible-header"><i class="material-icons">art_track</i>Click to open etailed analysis (JSON)</div>
+            <div class="collapsible-body">
+                <div class="log-print" style="display: block;">
+                    <pre>{{analysis}}</pre>
+                </div>
+            </div>
+        </li></ul>
     {% endif %}
 </div>
 
 {% endblock %}
+
+
 
