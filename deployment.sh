@@ -62,3 +62,6 @@ EOT
 
 sudo certbot --nginx -d $domain
 sudo chown -R :www-data /home/yan/jungle/jungle/staticfiles/
+
+
+# for git update, run collect static first

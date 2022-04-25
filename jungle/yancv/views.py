@@ -4,10 +4,8 @@ from django.core import serializers
 from .models import *
 
 def cv(request):
-
-    # certs = serializers.serialize("json", )
     certs = CvCert.objects.all().filter(enabled=True)
-    print (certs)
+    # some processing are done in html
     return render(request, 'yancv/cv.html', {
         "h1text": "Under Construction",
         "certs": certs

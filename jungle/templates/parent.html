@@ -77,7 +77,7 @@
             $('.tabs').tabs();
             $('.tooltipped').tooltip();
             $('.sidenav').sidenav();
-            $('.collapsible').collapsible({ accordion: true });
+            $('.collapsible').collapsible({ accordion: false });
             $('.datepicker').datepicker({ format: "yyyy-mm-dd"});
             $('.materialboxed').materialbox({
                 onOpenStart: function(e){
@@ -86,6 +86,9 @@
             });
         });
     </script>
-
 </body>
+<footer>
+    {% block foot %}
+    {% endblock %}    
+</footer>
 </html>
