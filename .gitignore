@@ -6,6 +6,7 @@ opencv_model/
 zzz*
 clouds.yaml
 localtest.py
+*.log.*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

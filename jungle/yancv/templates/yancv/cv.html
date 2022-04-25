@@ -1,5 +1,7 @@
 {% extends "parent.html" %}
 {% load static %}
+{% static "" as StaticUrl %}
+
 
 {% block title %}{{h1text}}{% endblock %}
 
@@ -172,15 +174,15 @@ h5{
         </p>
         <p class="center-align">
             <a target="_blank" href="https://www.credly.com/badges/0721ee37-cb4f-431d-80dc-4adba87e490b/public_url"><img
-                    height="50" src="/static/yancv/images/ibm-ai-engineering-professional-certificate.png"></a>
+                    height="50" src="{% static '' %}/yancv/images/ibm-ai-engineering-professional-certificate.png"></a>
             <a target="_blank" href="https://www.credly.com/badges/b080c9df-096e-4320-b582-bbedaf5e4bad/public_url"><img
-                    height="50" src="/static/yancv/images/google-data-analytics-certificate.png"></a>
+                    height="50" src="{% static '' %}/yancv/images/google-data-analytics-certificate.png"></a>
             <a target="_blank" href="https://www.credly.com/badges/385a5380-5768-4894-9632-5f6c659a073f/public_url"><img
-                    height="50" src="/static/yancv/images/azure-data-engineer.png"></a>
+                    height="50" src="{% static '' %}/yancv/images/azure-data-engineer.png"></a>
             <a target="_blank" href="https://www.credly.com/badges/74c7b935-6193-4280-9a51-7cd53f6ca7da/public_url"><img
-                    height="50" src="/static/yancv/images/azure-data-scientist.png"></a>
+                    height="50" src="{% static '' %}/yancv/images/azure-data-scientist.png"></a>
             <a target="_blank" href="https://www.credly.com/badges/f4d6393a-f54e-413f-90dd-4abdcaa17b62/public_url"><img
-                    height="50" src="/static/yancv/images/azure-ai-engineer.png"></a>
+                    height="50" src="{% static '' %}/yancv/images/azure-ai-engineer.png"></a>
         </p>
 
     </div>
@@ -256,8 +258,8 @@ h5{
                 </div>
                 <div class="col s3">
                     <div class="material-placeholder"><img class="materialboxed" width="99%"
-                            src="/static/yancv/thumbnails/msc_stat.jpg"
-                            data-enlarge-image="/static/yancv/images/msc_stat.png"></div>
+                            src="{% static '' %}/yancv/thumbnails/msc_stat.jpg"
+                            data-enlarge-image="{% static '' %}/yancv/images/msc_stat.png"></div>
                 </div>
             </div>
         </li>
@@ -274,8 +276,8 @@ h5{
                 </div>
                 <div class="col s3">
                     <div class="material-placeholder"><img class="materialboxed" width="99%"
-                            src="/static/yancv/thumbnails/msc_econ.jpg"
-                            data-enlarge-image="/static/yancv/images/msc_econ.png"></div>
+                            src="{% static '' %}/yancv/thumbnails/msc_econ.jpg"
+                            data-enlarge-image="{% static '' %}/yancv/images/msc_econ.png"></div>
                 </div>
             </div>
         </li>
@@ -326,8 +328,8 @@ h5{
                 <div class="col s5">
                     <!--'{% static "yancv/thumbnails/{{cert.imgname}}" %}'-->
                     <div class="material-placeholder"><img class="materialboxed" width="99%"
-                        src="/static/yancv/thumbnails/{{cert.imgname}}"
-                        data-enlarge-image="/static/yancv/images/{{cert.imgname}}">
+                        src="{% static '' %}/yancv/thumbnails/{{cert.imgname}}"
+                        data-enlarge-image="{% static '' %}/yancv/images/{{cert.imgname}}">
                     </div>
                     <p class="center-align">
                         tap to enlarge<br>
