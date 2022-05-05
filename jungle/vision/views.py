@@ -31,6 +31,8 @@ def hello(request):
         detector = GCPDetector()
     elif img_obj.aimodel == "mn": 
         detector = BaseDetector()
+    elif img_obj.aimodel == "husky": 
+        detector = HuskyInTwoSteps()
     else:
         detector = YoloDetector(model_selection=str(img_obj.aimodel))
         
