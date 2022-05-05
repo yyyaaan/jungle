@@ -30,6 +30,9 @@ class VisionDB(models.Model):
             ("yolov3", "YOLO-416"),
             ("yolov3-tiny", "YOLO-tiny"),
         )),
+        ("Special-2-step", (
+            ("husky", "EfficientNet + MobileNetV3"),
+        )),
     ])
     outjson = models.TextField("Value (json as str)", max_length=65535, blank=True)
     timestamp = models.DateTimeField(auto_now=True)

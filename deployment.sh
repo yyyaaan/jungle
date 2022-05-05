@@ -1,6 +1,6 @@
 # gunicorn jungle.wsgi:application -b 0.0.0.0:8999
 
-sudo apt install python3-certbot-nginx sqlite3
+sudo apt install python3-certbot-nginx sqlite3 ffmpeg libsm6 libxext6 -y
 git clone https://github.com/yyyaaan/jungle.git
 cd ~/jungle
 sudo -H pip install -r requirements.txt
