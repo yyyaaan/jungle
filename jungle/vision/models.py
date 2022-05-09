@@ -31,8 +31,8 @@ class VisionDB(models.Model):
             ("yolov3", "YOLO-416"),
             ("yolov3-tiny", "YOLO-tiny"),
         )),
-        ("Special-2-step", (
-            ("husky", "EfficientNet + MobileNetV3"),
+        ("Special-3-step", (
+            ("husky", "Haar + EfficientNet + MobileNetV3 (slow)"),
         )),
     ])
     outjson = models.TextField("Value (json as str)", max_length=65535, blank=True)
@@ -282,6 +282,25 @@ class YoloDetector:
 #    |_|  \_/\_/\___/ |___/\__\___| .__/ .__/\___|_|  
 #                                 |_|  |_|            
 
+# face masking
+class FaceAnonymizer:
+    def __init__(self):
+        # https://github.com/opencv/opencv/tree/4.x/data/haarcascades
+        self.face_cascade = cv2.CascadeClassifier(f"{BASE_DIR}/vision/opencv_model/face.xml")
+    
+    def detect_face_tensor(self, tensor, blur=0):
+        # Convert into grayscale
+        gray = cv2.cvtColor(tensor, cv2.COLOR_BGR2GRAY)
+        faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
+        if blur > 0:
+            for (x, y, w, h) in faces:
+                face_area = tensor[y:(y+h), x:(x+w)]
+                # blur size must be odd number
+                blur_size = (2*int(w/blur/2) + 1, 2*int(h/blur/2) + 1)
+                tensor[y:(y+h), x:(x+w)] = cv2.GaussianBlur(face_area, blur_size, 0)
+        
+        return tensor, faces
+
 
 # object detector
 class HuskyLiteDetector():
@@ -337,7 +356,6 @@ class HuskyLiteDetector():
 # classifier
 class HuskyNamer():
     
-    
     def __init__(self):
         from keras.models import load_model
         self.names = ['Kali', 'Keke', 'Tati', 'Tonti']
@@ -361,6 +379,7 @@ class HuskyNamer():
 
 class HuskyInTwoSteps():
     def __init__(self):
+        self.face = FaceAnonymizer()
         self.huskydetector = HuskyLiteDetector()
         self.huskynamer = HuskyNamer()
 
@@ -368,12 +387,13 @@ class HuskyInTwoSteps():
         image_tensor = cv2.imread(source) if type(source) == str else source
         
         # detector step:
+        image_tensor, _ = self.face.detect_face_tensor(image_tensor, blur=3)
         results = self.huskydetector.predict_tensor(image_tensor)
         # using classifier to enhance results
         for res in results:
                 box = res["bounding_box"]
                 object_tensor = image_tensor[box["top"]:box["bottom"], box["left"]:box["right"]]
-                res2 = huskynamer.predict_tensor(object_tensor)
+                res2 = self.huskynamer.predict_tensor(object_tensor)
                 res["class2"], res["score2"] = res2["class"], res["score"]
 
         # visualize
@@ -385,7 +405,7 @@ class HuskyInTwoSteps():
                 cv2.putText(image_tensor, result_text, text_location, cv2.FONT_HERSHEY_PLAIN, 1, (0,0,255), 1)
 
         if type(source) == str and display:
-            cv2.imshow("Husky in 2 steps", image_tensor)
+            cv2.imshow("Husky in 3 steps", image_tensor)
             cv2.waitKey(-1)
         if not display:
             return image_tensor, results

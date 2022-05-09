@@ -4,6 +4,8 @@ A conventional implementation of Django using unit-test. See sh file for some us
 
 To set up a new model and its database, go to `settings.py` to INATALLED_APPS, and then perform makemigrations. If folder strucuted different use full path to the automatically generated AppConfig class under `apps.py`.
 
+> On Mac with Apple Silicon, only conda environment supported. Venv is not working for tensorflow/keras models.
+
 ## Settings outline
 |||
 |---|---|
