@@ -1,4 +1,5 @@
 explore/
+staticfiles
 /jungle/media/vision/
 media/vision/
 opencv_model/
