@@ -25,6 +25,7 @@ urlpatterns = [
     path('ycrawl/', include("ycrawl.urls")),
     path('play/', include("play.urls")),
     path('vision/', include("vision.urls")),
+    path('msg/', include("messenger.urls")),
     path('admin/', admin.site.urls),
 ]
 

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'frontend',
     'vision',
     'yancv',
+    'messenger',
     'rest_framework',
     'rest_framework.authtoken',
     'django_otp',
@@ -210,6 +211,10 @@ if not DEBUG:
                 'level': 'INFO',
             },
             'commonlib': {
+                'handlers': ['console', 'logfile'],
+                'level': 'INFO',
+            },
+            'messenger': {
                 'handlers': ['console', 'logfile'],
                 'level': 'INFO',
             },
