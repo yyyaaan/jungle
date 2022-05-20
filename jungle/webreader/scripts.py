@@ -47,8 +47,10 @@ class WebReaderThreaded(Thread):
             if s[0]=='+' and s[-1] !="\r": str_add += s[-1]
 
         # notifiy and write when diff recognized
-        status = "Updated" if len(str_del + str_add) > 3 else "OK"
-        self.write_to_cache(the_text, "Updated")
+        if len(str_del + str_add) > 3:
+            self.write_to_cache(the_text, "Updated", info=f"ADD: {str_add}; DEL: {str_del}")
+        else:
+            self.write_to_cache(the_text, "OK")
         return True
 
         

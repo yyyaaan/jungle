@@ -18,5 +18,7 @@ class WebReader(models.Model):
     task = models.ForeignKey(WebTasks, on_delete=models.CASCADE)
     response = models.TextField("Response", max_length=1024*1024)
     status = models.CharField("Status", max_length=1023)
-    info = models.CharField("Extra Info", max_length=255, blank=True)
+    info = models.TextField("Extra Info", max_length=1024*1024, blank=True)
     timestamp = models.DateTimeField(auto_now=True)
+    class Meta:
+        get_latest_by = 'timestamp'
