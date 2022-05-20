@@ -40,6 +40,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 INSTALLED_APPS = [
     'play',
+    'webreader',
     'ycrawl',
     'frontend',
     'vision',
