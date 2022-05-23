@@ -31,7 +31,11 @@ DEBUG = (getenv("djangodebug") == None)
 ALLOWED_HOSTS = [
     "35.228.1.223",
     "127.0.0.1",
-    "new.yan.fi"
+    "localhost",
+    "new.yan.fi",
+    "yanpan.fi",
+    "yan.fi",
+    "86.50.253.249",
 ]
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
