@@ -2,6 +2,22 @@
 <!--site-packages/rest_framework/templates/rest_framework/base.html-->
 
 {% block branding %}
-<a class='navbar-brand' rel="nofollow" href='/ycrawl'>yCrawl Browsable APIs</a>
+<a class='navbar-brand' rel="nofollow" href='/'>YYY...</a>
 {% endblock %}
 
+{% block style %}
+{{ block.super }}
+<style>
+.navbar {
+    background: transparent;
+    color: #778899;
+    border-top: 5px solid #778899;
+}
+.navbar .nav li, .navbar-text, .navbar-inverse .navbar-brand {
+    color: #778899;
+}
+body {
+    background: none;
+}
+</style>
+{% endblock %}

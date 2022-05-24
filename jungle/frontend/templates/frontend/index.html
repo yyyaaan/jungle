@@ -2,6 +2,12 @@
 {% block title %}{{h1text}}{% endblock %}
 
 {% block head %}
+<script>
+    function showLog() {
+        document.getElementById('log-btn').style.display = "none";
+        document.getElementById('log-print').style.display = "block";
+    };
+</script>
 <style>
 .mainnav-wrapper {
   margin: 5% 5% 5% 5%;
@@ -19,7 +25,7 @@
   width: 100%;
   color: #fff;
   padding-top: 15px;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
 }
 #mainnavdrop{
   width:220px !important;
@@ -42,11 +48,11 @@ h1 {
   <h1>y...</h1>
 </div>
 <div class="row mainnav-wrapper">
-  <div class="col s12 m4 l2 hoverable">
-    <a href="#" data-target="slide-out" class="sidenav-trigger waves-effect waves-light btn-flat"><i class="material-icons">menu</i>  Menu</a>
+  <div class="col s12 m4 l1 hoverable">
+    <a href="#" data-target="slide-out" class="sidenav-trigger waves-effect waves-light btn-flat"><i class="material-icons">menu</i>menu</a>
   </div>
-  <div class="col s12 m4 l2 hoverable">
-    <a class='dropdown-trigger btn-flat' href='#' data-target='mainnavdrop'><i class="material-icons">arrow_drop_down_circle</i>  Shortcuts</a>
+  <div class="col s12 m4 l1 hoverable">
+    <a class='dropdown-trigger btn-flat' href='#' data-target='mainnavdrop'><i class="material-icons">arrow_drop_down_circle</i>more</a>
     <ul id='mainnavdrop' class='dropdown-content'>
       {% for x in dropgrp1 %}
       <li><a href="/{{x.cleanurl}}"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a></li>
@@ -68,15 +74,29 @@ h1 {
 
 
 {% block contentmore %} 
-<div class="col m3 s12">
-    <p class="right-align"> {{h1text}}</p>
-</div>
-<div class="col m1 s12">
-</div>
-<div class="col m4 s12"><small>
-{% autoescape off %}{{html1}}{% endautoescape %}
-</small></div>
-<div class="col m4 s12"><small>
-{% autoescape off %}{{html2}}{% endautoescape %}
-</small></div>
+{% if extra %}
+  <div class="col m3 s12">
+      <p class="right-align"> {{extra}}</p>
+      <p class='right-align'><a id="log-btn" class="btn-flat" onclick="showLog()">runtime log</a></p>
+
+  </div>
+  <div class="col m1 s12">
+  </div>
+  <div class="col m4 s12">
+    <p>Not listed URLs:</p>
+    {% for x in notlisted %}<a href="{{x.cleanurl}}">{{x.cleanurl}}</a><br />{% endfor %}
+    <p><a class='btn blue-grey lighten-1' href='/admin/frontend/siteurl/'>Menu Admin</a></p>
+  </div>
+  <div class="col m4 s12">
+    <p>All URLs:</p>
+    {% for x in allurls %}<a href="{{x}}">{{x}}</a><br />{% endfor %}
+  </div>
+  <div id="log-print" class="col container" style="display: none; margin:9%;">
+    <pre>{{log}}</pre>
+  </div>
+
+{% endif %}
+
 {% endblock %}
+
+

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="shortcut icon" type="image/png" sizes="32x32" href="https://yan.fi/cv/static/images/favicon-32x32.png">
     <link rel="shortcut icon" type="image/png" sizes="16x16" href="https://yan.fi/cv/static/images/favicon-16x16.png">
-    <title>Monitor {% block title %}{% endblock %}</title>
+    <title>Y... {% block title %}{% endblock %}</title>
     <!-- CSS  -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
@@ -36,16 +36,7 @@
                 <img width="100%" src="https://yan.fi/cv/static/images/theme.png">
             </div>
         </div>
-        <li><a href="https://console.cloud.google.com/logs/query?project=yyyaaannn&authuser=1"><i class="material-icons">burst_mode</i>All logs</a></li>
-        <li><a href="/vms"><i class="material-icons">layers</i>Virtual Machines</a></li>
-        <li><a href="/myweb"><i class="material-icons">web</i>Web Readers</a></li>
-        <li><a href="/vision"><i class="material-icons">panorama</i>AI Vision</a></li>
-        <li><a href="https://datastudio.google.com/u/0/reporting/d69d4892-6779-4d66-8b38-2fee9fd00dc1/page/kE3mC"><i class="material-icons">dashboard</i>Live Dashboard</a></li>
-        <li><div class="divider"></div></li>
-        <li><a href="/cv"><i class="material-icons">assignment_ind</i>Yan's CV</a></li>
-        <li><a href="https://yan.fi/"><i class="material-icons">pages</i>Link to main</a></li>
-        <li><div class="divider"></div></li>
-        <li><a onclick="M.toast({html: 'Cheers! I am a toast'})" class="waves-effect" href="#!"><i class="material-icons">pets</i>Have a Toast</a></li>
+        {% include "sidenav.html" %}
     </ul>
 
     <!--open side nav-->

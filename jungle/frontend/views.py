@@ -1,4 +1,5 @@
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
+from django.template import Template, Context
 from django.conf import settings
 from django.urls import URLPattern, URLResolver
 from django.shortcuts import render
@@ -10,6 +11,21 @@ from json import loads, dumps
 from .models import *
 from commonlib.vmmanager import vm_list_all
 from ycrawl.serializers import *
+
+# helper function (will be called be sitemap)
+def make_sidenav():
+    links = SiteUrl.objects.filter(menu2__lt=10000)
+    menudata = {
+        "dropgrp1": links.filter(menu2__lt=100).order_by("menu2"),
+        "dropgrp2": links.filter(menu2__gt=100).order_by("menu2"),
+    }
+
+    t = open(f"{str(settings.BASE_DIR)}/templates/sidenavtemplate.html", "r").read()
+    t = Template(t)
+    x = t.render(Context(menudata))
+    open(f"{str(settings.BASE_DIR)}/templates/sidenav.html", "w").write(x)
+    
+    return True
 
 
 # Create your views here.
@@ -26,10 +42,10 @@ def hello(request):
     return render(request, 'frontend/index.html', pagedata)
 
 
+@login_required(login_url='/admin/login/')
 def get_urls(request):
     
     urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [''])
-
     def list_urls(lis, acc=None):
         if acc is None:
             acc = []
@@ -49,24 +65,23 @@ def get_urls(request):
     prev_cnt = SiteUrl.objects.all().count()
     for one in sorted(all_urls):
         if SiteUrl.objects.filter(rawurl=one).count() == 0:
-            item = SiteUrl(rawurl=one, cleanurl=one, menu1=99999, menu2=999999)
+            item = SiteUrl(rawurl=one, cleanurl=one, menu1=123456, menu2=123456)
             item.save()
 
-    urls_href = [f"<a href='/{x}'>{x}</a>" for x in all_urls]
-    all_urls = "<br/>".join(sorted(urls_href))
-    non_listed = SiteUrl.objects.filter(menu1__gt=1000)
-    non_listed = [f"<a href='/{x.cleanurl}'>{x.cleanurl}</a>" for x in non_listed]
-    non_urls = "<br/>".join(sorted(non_listed))
 
     pagedata = hello({"json": True})
-    pagedata["h1text"] = f"{SiteUrl.objects.all().count() - prev_cnt} new url"
-    pagedata["html1"] = "<p>Not listed urls:</p>"+ non_urls + \
-        "<p><a class='btn blue-grey lighten-1' href='/admin/frontend/siteurl/'>Menu Admin</a></p>"
-    pagedata["html2"] = "<p>All urls</p>"+ all_urls
+    pagedata["extra"] = f"{SiteUrl.objects.all().count() - prev_cnt} new url."
+    pagedata["allurls"] = all_urls
+    pagedata["notlisted"] = SiteUrl.objects.filter(menu1__gt=1000)
+    # read logs
+    pagedata["log"] = open(f"{str(settings.BASE_DIR)}/jungle.log", "r").read()
 
-    
+    make_sidenav()
 
     return render(request, 'frontend/index.html', pagedata)
+
+
+
 
 
 
@@ -144,3 +159,7 @@ def vm_action(request):
     }
 
     return render(request, 'minimal.html', payload)
+
+
+
+
