@@ -10,7 +10,7 @@ logger = getLogger("messenger")
 class MessengerData(models.Model):
     audience = models.CharField("Target Audience", max_length=99)
     provider = models.CharField("Service Provider", max_length=20, blank=True)
-    text = models.CharField("Text", max_length=20)
+    text = models.CharField("Text", max_length=200)
     richcontent = models.TextField("Rich Content", max_length=65535, blank=True)
     response = models.TextField("Response", max_length=65535, blank=True)
     timestamp = models.DateTimeField(auto_now=True)

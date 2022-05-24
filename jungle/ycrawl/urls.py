@@ -15,5 +15,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('START/', views.StartYcrawl.as_view(), name="start_ycrawl"),
     path('GETNODES/', views.GetNodeJobs.as_view(), name="get_nodes_jobs"),
+    path('rundata/', views.RunData.as_view(), name="run_data"),
 #    path('auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

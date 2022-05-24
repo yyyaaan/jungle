@@ -8,9 +8,34 @@ from datetime import date
 from .models import *
 from .serializers import *
 from commonlib.ycrawlurlmaker import call_url_coordinator
+from commonlib.secretmanager import get_secret
 
 
 API_RENDERERS = [renderers.AdminRenderer, renderers.BrowsableAPIRenderer, renderers.JSONRenderer, renderers.JSONOpenAPIRenderer]
+
+class RunData(views.APIView):
+    """Call for data processor to run/stop (backward compatible actions)"""
+    #permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        if "AUTH" not in request.data or request.data["AUTH"] != get_secret("ycrawl-simple-auth"):
+            return Response({"success": False}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            action_serializer = VmActionSerializer(data={
+                "vmids": [request.data['VMID']],
+                "event": ("STOP" if "STOP" in request.data else "START"),
+                "info": "called from rundata endpoints" 
+            })        
+            if action_serializer.is_valid(raise_exception=True):
+                action_serializer.save()
+
+            return Response({"success": True}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(str(e))
+            return Response({"success": False}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
 
 class GetNodeJobs(views.APIView):
     """Provide list of NodeJS jobs for yCrawl nodes"""
@@ -91,7 +116,7 @@ class StartYcrawl(views.APIView):
         self.isstart = False if 'stop' in request.data else True
         vmids = [x.vmid for x in self.start_ycrawl()]
         if format=="CRON": return "OK"
-        return Response({"sucess": True, "vm_applied": vmids}, status=status.HTTP_202_ACCEPTED)
+        return Response({"success": True, "vm_applied": vmids}, status=status.HTTP_202_ACCEPTED)
 
 
 class VmViewSet(viewsets.ModelViewSet):

@@ -1,30 +1,82 @@
 {% extends "parent.html" %}
 {% block title %}{{h1text}}{% endblock %}
 
-{% block content %} 
-<div class="col m3 s12">
-</div>
-<div class="col m9 s12" style="margin-bottom: 20%">
-    <p>
-        <a class="waves-effect waves-light btn-large" href="/vision">
-            <i class="material-icons left">party_mode</i>AI Vision
-        </a>
-    </p>
-    <p style="margin-top:50px">
-        <a href="#" data-target="slide-out" class="sidenav-trigger waves-effect waves-light btn-large">
-            <i class="material-icons">menu</i>Open Menu</a>
-
-    </p>
-</div>
+{% block head %}
+<style>
+.mainnav-wrapper {
+  margin: 5% 5% 5% 5%;
+  border-radius: 6px;
+  border: 9px solid lightslategray;
+  background-color: lightslategray;
+}
+.mainnav-wrapper > div.col {
+  color: #fff;
+  height: 80px;
+  background-color: lightslategray;
+}
+.mainnav-wrapper > div.col > a{
+  height: 100%;
+  width: 100%;
+  color: #fff;
+  padding-top: 15px;
+  font-size: 1.3rem;
+}
+#mainnavdrop{
+  width:220px !important;
+}
+#the-menu{
+  display:none;
+}
+h1 {
+  font-size: 6rem;
+  font-weight: 600;
+  margin-left: 50%;
+  color:lightslategray;
+}
+</style>
 {% endblock %}
+
+
+{% block content %} 
+<div class="row">
+  <h1>y...</h1>
+</div>
+<div class="row mainnav-wrapper">
+  <div class="col s12 m4 l2 hoverable">
+    <a href="#" data-target="slide-out" class="sidenav-trigger waves-effect waves-light btn-flat"><i class="material-icons">menu</i>  Menu</a>
+  </div>
+  <div class="col s12 m4 l2 hoverable">
+    <a class='dropdown-trigger btn-flat' href='#' data-target='mainnavdrop'><i class="material-icons">arrow_drop_down_circle</i>  Shortcuts</a>
+    <ul id='mainnavdrop' class='dropdown-content'>
+      {% for x in dropgrp1 %}
+      <li><a href="/{{x.cleanurl}}"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a></li>
+      {% endfor %}
+      <li class="divider" tabindex="-1"></li>
+      {% for x in dropgrp2 %}
+      <li><a href="/{{x.cleanurl}}"><i class="material-icons">{{x.icon}}</i>{{x.desc1}}</a></li>
+      {% endfor %}
+      <li class="divider" tabindex="-1"></li>
+      <li><a href="#!"><i class="material-icons">undo</i>Back</a></li>
+    </ul>
+  </div>
+  {% for x in mainitems %}
+  <div class="col s12 m4 l2 hoverable">
+    <a href="/{{x.cleanurl}}" class="waves-effect waves-light btn-flat"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a>
+  </div>
+  {% endfor %}
+{% endblock %}
+
 
 {% block contentmore %} 
 <div class="col m3 s12">
-    <h1> {{h1text}}</h1>
+    <p class="right-align"> {{h1text}}</p>
 </div>
 <div class="col m1 s12">
 </div>
-<div class="col m8 s12"><small>
-{% autoescape off %}{{mainhtml}}{% endautoescape %}
+<div class="col m4 s12"><small>
+{% autoescape off %}{{html1}}{% endautoescape %}
+</small></div>
+<div class="col m4 s12"><small>
+{% autoescape off %}{{html2}}{% endautoescape %}
 </small></div>
 {% endblock %}

@@ -43,6 +43,8 @@ def hello(request):
     b64img = b64encode(frame_buff).decode("UTF-8")
     if type(analysis) == dict:
         analysis = dumps(analysis, indent=4, default=str)
+    if type(analysis) == list:
+        analysis = dumps({"res": analysis}, indent=4, default=str)
 
 
     # save the result to VisionDB
