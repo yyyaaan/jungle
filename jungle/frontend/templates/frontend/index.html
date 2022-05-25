@@ -2,42 +2,79 @@
 {% block title %}{{h1text}}{% endblock %}
 
 {% block head %}
-<script>
-    function showLog() {
-        document.getElementById('log-btn').style.display = "none";
-        document.getElementById('log-print').style.display = "block";
-    };
-</script>
 <style>
-.mainnav-wrapper {
-  margin: 5% 5% 5% 5%;
-  border-radius: 6px;
-  border: 9px solid lightslategray;
-  background-color: lightslategray;
-}
-.mainnav-wrapper > div.col {
-  color: #fff;
-  height: 80px;
-  background-color: lightslategray;
-}
-.mainnav-wrapper > div.col > a{
-  height: 100%;
+#bgimg{
+  position: fixed;
+  top: 34%;
+  left: 0%;
   width: 100%;
-  color: #fff;
-  padding-top: 15px;
-  font-size: 1.2rem;
+  height: 66%;
+  opacity: 0.03;
+  z-index:-9999;
 }
-#mainnavdrop{
-  width:220px !important;
+#bgimg > img {
+  width: 100%;
+  height: 100%;
 }
 #the-menu{
-  display:none;
+  display: none;
+}
+.mainnav-wrapper { /*not on large*/
+  margin: 5% 5% 5% 5%;
+  border-radius: 6px;
+  border: 9px solid #d2fbff;
+  background-color: #d2fbff;    
+  border-radius: 6px;
+
+}
+.mainnav-wrapper > div.col { /*not on large*/
+  height: 80px;
+  background-color: #d2fbff;
+}
+.mainnav-wrapper > div.col > a { /*not on large*/
+  height: 100%;
+  width: 100%;
+  color: #25c0cb;
+  padding-top: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+#mainnavdrop { /*not on large*/
+  width:220px !important;
+}
+a > i.material-icons {
+  margin-right: 8px;
+}
+p.listview {
+  margin: 2px;
+}
+p.about-me {
+  margin: 0% 5% 9% 5%;
+  text-align: right;
+}
+p.about-me > a, h1{
+  color:#6AE5EE;
 }
 h1 {
-  font-size: 6rem;
+  font-size: 8rem;
   font-weight: 600;
-  margin-left: 50%;
-  color:lightslategray;
+  text-align: right;
+  margin: 12% 5% 1% 10%;
+  border-bottom: 9px #d2fbff solid;
+  padding-bottom: 50px;
+}
+@media only screen and (max-width : 992px) {
+  h1 {
+    text-align: center;
+    margin: 3% 0% 0% 3%;
+    color: #6AE5EE;
+    font-size: 6rem;
+    border-bottom: none;
+    padding-bottom: 10px;
+  }
+  p.about-me{
+    text-align: left;
+  }
 }
 </style>
 {% endblock %}
@@ -47,11 +84,16 @@ h1 {
 <div class="row">
   <h1>y...</h1>
 </div>
-<div class="row mainnav-wrapper">
-  <div class="col s12 m4 l1 hoverable">
+<div class="row mainnav-wrapper hide-on-large-only">
+  <div class="col s12 m4 xl2 hoverable">
     <a href="#" data-target="slide-out" class="sidenav-trigger waves-effect waves-light btn-flat"><i class="material-icons">menu</i>menu</a>
   </div>
-  <div class="col s12 m4 l1 hoverable">
+  {% for x in mainitems %}
+  <div class="col s12 m4 hoverable">
+    <a href="/{{x.cleanurl}}" class="waves-effect waves-light btn-flat"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a>
+  </div>
+  {% endfor %}
+  <div class="col s12 m4 hoverable">
     <a class='dropdown-trigger btn-flat' href='#' data-target='mainnavdrop'><i class="material-icons">arrow_drop_down_circle</i>more</a>
     <ul id='mainnavdrop' class='dropdown-content'>
       {% for x in dropgrp1 %}
@@ -65,38 +107,80 @@ h1 {
       <li><a href="#!"><i class="material-icons">undo</i>Back</a></li>
     </ul>
   </div>
-  {% for x in mainitems %}
-  <div class="col s12 m4 l2 hoverable">
-    <a href="/{{x.cleanurl}}" class="waves-effect waves-light btn-flat"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a>
-  </div>
-  {% endfor %}
+</div>
+<p class="about-me">
+  <a href="cv/">
+    <i class="material-icons">assignment_ind</i>
+    Yan Pan - About Me 
+  </a>
+</p>
+
 {% endblock %}
 
 
 {% block contentmore %} 
-{% if extra %}
-  <div class="col m3 s12">
-      <p class="right-align"> {{extra}}</p>
-      <p class='right-align'><a id="log-btn" class="btn-flat" onclick="showLog()">runtime log</a></p>
+<div id="bgimg">
+  <img src="/static/yancv/images/theme.png">
+</div>
+<div class="col m3 s12">
+  {% if extra %}
+    <p class="right-align"> {{extra}}</p>
+    <p class='right-align'><a id="log-btn" class="btn-flat" onclick="showLog()">runtime log</a></p>
+  {% endif %}
+</div>
 
-  </div>
-  <div class="col m1 s12">
-  </div>
-  <div class="col m4 s12">
+<div class="col m1 s12">
+</div>
+
+<div class="col m4 s6">
+  <p> </p>
+  {% for x in listgrp3 %}
+  <p class="listview" style="{{x.style}}">
+    <a href="{{x.cleanurl}}">
+      <i class="material-icons">{{x.icon}}</i>
+      {% if x.desc3 %} {{x.desc3}} {% else %} {{x.desc2}} {% endif %}
+      </a>  
+  </p>
+  {% endfor %}
+  
+  {% if notlisted %}
     <p>Not listed URLs:</p>
     {% for x in notlisted %}<a href="{{x.cleanurl}}">{{x.cleanurl}}</a><br />{% endfor %}
     <p><a class='btn blue-grey lighten-1' href='/admin/frontend/siteurl/'>Menu Admin</a></p>
-  </div>
-  <div class="col m4 s12">
-    <p>All URLs:</p>
+  {% endif %}
+</div>
+
+<div class="col m4 s6">
+  <p> </p>
+  {% for x in listgrp1 %}
+  <p class="listview" style="{{x.style}}">
+    <a href="{{x.cleanurl}}">
+      <i class="material-icons">{{x.icon}}</i>
+      {% if x.desc3 %} {{x.desc3}} {% else %} {{x.desc2}} {% endif %}
+    </a>
+  </p>
+  {% endfor %}
+
+  {% if allurls %}
+    <p>All Django URLs:</p>
     {% for x in allurls %}<a href="{{x}}">{{x}}</a><br />{% endfor %}
-  </div>
-  <div id="log-print" class="col container" style="display: none; margin:9%;">
-    <pre>{{log}}</pre>
-  </div>
+  {% endif %}
+</div>
 
-{% endif %}
-
+<div id="log-print" class="col container" style="display: none; margin:9%;">
+  <pre>{{log}}</pre>
+</div>
 {% endblock %}
 
 
+{% block foot %}
+<script>
+    function showLog() {
+        document.getElementById('log-btn').style.display = "none";
+        document.getElementById('log-print').style.display = "block";
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+      fixSideNav();
+  });
+</script>
+{% endblock %}

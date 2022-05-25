@@ -31,10 +31,13 @@ def make_sidenav():
 # Create your views here.
 def hello(request):
     links = SiteUrl.objects.filter(menu1__lt=10000)
+    lists = SiteUrl.objects.filter(menu3__lt=10000)
     pagedata = {
         "mainitems": links.filter(menu1__lt=100).order_by("menu1"),
         "dropgrp1": links.filter(menu1__gt=100, menu1__lt=200).order_by("menu1"),
         "dropgrp2": links.filter(menu1__gt=200).order_by("menu1"),
+        "listgrp1": lists.filter(menu3__gt=1000, menu3__lt=2000).order_by("menu3"),
+        "listgrp3": lists.filter(menu3__gt=3000, menu3__lt=4000).order_by("menu3"),
     }
 
     if "json" in request:
@@ -72,7 +75,7 @@ def get_urls(request):
     pagedata = hello({"json": True})
     pagedata["extra"] = f"{SiteUrl.objects.all().count() - prev_cnt} new url."
     pagedata["allurls"] = all_urls
-    pagedata["notlisted"] = SiteUrl.objects.filter(menu1__gt=1000)
+    pagedata["notlisted"] = SiteUrl.objects.filter(menu1__gt=10000, menu2__gt=10000, menu3__gt=10000).exclude(menu1=1000000)
     # read logs
     pagedata["log"] = open(f"{str(settings.BASE_DIR)}/jungle.log", "r").read()
 
@@ -152,8 +155,8 @@ def vm_action(request):
             <p>{"</p><p>".join(logs)}</p>
             <p>{"</p><p>".join(trails)}</p>
             <p>
-                <a target='_blank' href='/admin/ycrawl/vmactionlog/'> Action Log</a> | 
-                <a target='_blank' href='/admin/ycrawl/vmtrail/'> Trails </a>
+                <a target='_blank' href='/ycrawl/actions/'> Action Log</a> | 
+                <a target='_blank' href='/ycrawl/trails/'> Trails </a>
             </p>    
         """
     }
