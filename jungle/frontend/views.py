@@ -16,6 +16,7 @@ from ycrawl.serializers import *
 
 # helper function (will be called be sitemap)
 def make_sidenav():
+    """write sidenav to static html; other pages will load that"""
     links = SiteUrl.objects.filter(menu2__lt=10000)
     menudata = {
         "dropgrp1": links.filter(menu2__lt=100).order_by("menu2"),
@@ -70,13 +71,13 @@ def get_urls(request):
     prev_cnt = SiteUrl.objects.all().count()
     for one in sorted(all_urls):
         if SiteUrl.objects.filter(rawurl=one).count() == 0:
-            item = SiteUrl(rawurl=one, cleanurl=one, menu1=123456, menu2=123456, menu3=123456)
+            item = SiteUrl(rawurl=one, cleanurl=f"/{one}", menu1=123456, menu2=123456, menu3=123456)
             item.save()
 
 
     pagedata = hello({"json": True})
     pagedata["extra"] = f"{SiteUrl.objects.all().count() - prev_cnt} new url."
-    pagedata["allurls"] = all_urls
+    pagedata["allurls"] = all_urls # when rendering, prefix a backslash!!!
     pagedata["notlisted"] = SiteUrl.objects.filter(menu1__gt=10000, menu2__gt=10000, menu3__gt=10000).exclude(menu1=1000000)
     # read logs
     pagedata["log"] = open(f"{str(settings.BASE_DIR)}/jungle.log", "r").read()
@@ -117,6 +118,9 @@ def vm_management(request):
 
 
 def job_overview(request):
+
+    GSBUCKET, RUN_MODE, _ = meta_major()
+
     info, n_all, n_todo, n_done, n_forfeit, n_error, nu_error =  call_url_coordinator(type="INFO")
     all_files, info_str = storage_file_viewer()
 
@@ -125,7 +129,7 @@ def job_overview(request):
         n_jobs = f"{n_all-n_todo}/{n_all}",
         jobs_detail = f"{n_done} completed<br/>{nu_error}({n_error})+{n_forfeit} issues",
         jobs_str = info,
-        info_str = f"  {DATE_STR[4:]}  {info_str}",
+        info_str = f"  {info_str}",
         all_files = all_files,
         gss_link = f"https://console.cloud.google.com/storage/browser/{GSBUCKET}/{RUN_MODE}/{datetime.now().strftime('%Y%m/%d')}",
         gso_link = f"https://console.cloud.google.com/storage/browser/yyyaaannn-us/yCrawl_Output/{datetime.now().strftime('%Y%m')}",

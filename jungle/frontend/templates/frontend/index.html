@@ -104,18 +104,18 @@ h1 {
   </div>
   {% for x in mainitems %}
   <div class="col s12 m4 hoverable">
-    <a href="/{{x.cleanurl}}" class="waves-effect waves-light btn-flat"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a>
+    <a href="{{x.cleanurl}}" class="waves-effect waves-light btn-flat"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a>
   </div>
   {% endfor %}
   <div class="col s12 m4 hoverable">
     <a class='dropdown-trigger btn-flat' href='#' data-target='mainnavdrop'><i class="material-icons">arrow_drop_down_circle</i>more</a>
     <ul id='mainnavdrop' class='dropdown-content'>
       {% for x in dropgrp1 %}
-      <li><a href="/{{x.cleanurl}}"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a></li>
+      <li><a href="{{x.cleanurl}}"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a></li>
       {% endfor %}
       <li class="divider" tabindex="-1"></li>
       {% for x in dropgrp2 %}
-      <li><a href="/{{x.cleanurl}}"><i class="material-icons">{{x.icon}}</i>{{x.desc1}}</a></li>
+      <li><a href="{{x.cleanurl}}"><i class="material-icons">{{x.icon}}</i>{{x.desc1}}</a></li>
       {% endfor %}
       <li class="divider" tabindex="-1"></li>
       <li><a href="#!"><i class="material-icons">undo</i>Back</a></li>
@@ -148,7 +148,7 @@ h1 {
 <div class="col m4 s6 col-hover">
   <p> </p>
   {% for x in listgrp3 %}
-  <p class="listview" style="{{x.style}}">
+  <p class="listview"  {%if x.style %}style="{{x.style}}"{% endif %}>
     <a href="{{x.cleanurl}}">
       <i class="material-icons">{{x.icon}}</i>
       {% if x.desc3 %} {{x.desc3}} {% else %} {{x.desc2}} {% endif %}
@@ -166,7 +166,7 @@ h1 {
 <div class="col m4 s6 col-hover">
   <p> </p>
   {% for x in listgrp1 %}
-  <p class="listview" style="{{x.style}}">
+  <p class="listview" {%if x.style %}style="{{x.style}}"{% endif %}>
     <a href="{{x.cleanurl}}">
       <i class="material-icons">{{x.icon}}</i>
       {% if x.desc3 %} {{x.desc3}} {% else %} {{x.desc2}} {% endif %}
@@ -175,8 +175,8 @@ h1 {
   {% endfor %}
 
   {% if allurls %}
-    <p>All Django URLs:</p>
-    {% for x in allurls %}<a href="{{x}}">{{x}}</a><br />{% endfor %}
+    <p>All Django URLs (/ added to link):</p>
+    {% for x in allurls %}<a href="/{{x}}">{{x}}</a><br />{% endfor %}
   {% endif %}
 </div>
 

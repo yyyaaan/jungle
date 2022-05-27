@@ -16,7 +16,9 @@ from commonlib.ycrawlurlmaker import *
 
 
 def storage_file_viewer():
-
+    
+    GSBUCKET, RUN_MODE, _ = meta_major()
+    
     bucket = storage.Client().get_bucket(GSBUCKET)
     all_files = [x.name for x in bucket.list_blobs(prefix=f'{RUN_MODE}/{datetime.now().strftime("%Y%m/%d")}')]
     info_str = "All scheduled tasks done." if len([x for x in all_files if "meta_on_completion" in x]) else "In progress..."
@@ -24,7 +26,10 @@ def storage_file_viewer():
     all_uurls = fetch_all_urls()
     uurls_by_key = dict([(x['key'].split("_")[1], x['url']) for x in all_uurls])
 
-    revert_batch = dict([(x['batch'], x['name']) for x in CLUSTER])
+    revert_batch = dict([
+        (x.batchnum, x.vmid) for x in 
+        VmRegistry.objects.filter(project="yCrawl", role="crawler")
+    ])
 
     main_list_draft = [{
         "key": the_key,
@@ -60,8 +65,6 @@ def storage_file_viewer():
 
 
 def get_simple_log():
-    global DATE_STR #ensure refresh on new day
-    DATE_STR = date.today().strftime("%Y%m%d")
 
     log_client = gcplogging.Client()
 
@@ -79,7 +82,7 @@ def get_simple_log():
     log_simplified = [x for x in log_simplified if "!DOCTYPE html" not in x]
 
     logs_by_vm = [{"name": "App-Engine", "logs": "<br/>".join(logs_stdout)}]
-    for the_vm in [x["name"] for x in CLUSTER]:
+    for the_vm in [x.vmid for x in VmRegistry.objects.filter(project="yCrawl", role="crawler")]:
         the_log_entries = [x.replace(the_vm, "") for x in log_simplified + logs_stdout if the_vm in x and "VM Manager" not in x]
         the_log = {
             "name": the_vm.upper().replace("YCRAWL-", ""),

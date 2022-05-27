@@ -4,73 +4,6 @@ from google.cloud import storage
 
 from ycrawl.models import *
 
-# to be optimized
-CLUSTER= [
-        {
-            "batch": 0,
-            "name": "ycrawl-1-pl",
-            "zone": "europe-central2-b",
-            "resource": "default",
-            "provider": "GCP"
-        },
-        {
-            "batch": 1,
-            "name": "ycrawl-2-fi",
-            "zone": "europe-north1-b",
-            "resource": "default",
-            "provider": "GCP"
-        },
-        {
-            "batch": 2,
-            "name": "ycrawl-3-se",
-            "zone": "eu-north-1c",
-            "resource": "i-05baaec0fe7fe4d66",
-            "provider": "AWS"
-        },
-        {
-            "batch": 3,
-            "name": "ycrawl-4-fr",
-            "zone": "eu-west-3b",
-            "resource": "i-07a9cb47522f26bf8",
-            "provider": "AWS"
-        },
-        {
-            "batch": 4,
-            "name": "ycrawl-5r-ie",
-            "zone": "northeurope",
-            "resource": "yCrawl",
-            "provider": "Azure"
-        },
-        {
-            "batch": 5,
-            "name": "ycrawl-6r-nl",
-            "zone": "westeurope",
-            "resource": "yCrawl",
-            "provider": "Azure"
-        },
-        {
-            "batch": 6,
-            "name": "ycrawl-7-csc",
-            "zone": "nova",
-            "resource": "yCrawl",
-            "provider": "CSC"
-        },
-	{
-            "batch": 7,
-            "name": "ycrawl-8-csc",
-            "zone": "nova",
-            "resource": "yCrawl",
-            "provider": "CSC"
-        },
-	{
-            "batch": 8,
-            "name": "ycrawl-9-csc",
-            "zone": "nova",
-            "resource": "yCrawl",
-            "provider": "CSC"
-        }
-    ]
-
 
 
 #   _  __            ____                                _                
@@ -79,31 +12,31 @@ CLUSTER= [
 #  | . \  __/ |_| | |  __/ (_| | | | (_| | | | | | |  __/ ||  __/ |  \__ \
 #  |_|\_\___|\__, | |_|   \__,_|_|  \__,_|_| |_| |_|\___|\__\___|_|  |___/
 #            |___/                                                        
-# control_id is either 1, 2, 3 or 0 defines a quarter of all tasks
-DATE_STR = date.today().strftime("%Y%m%d")
-CONTROL_ID = ((date.today() - date(1970,1,1)).days) % 4
+# control id is either 1, 2, 3 or 0 defines a quarter of all tasks
 
 # META is now saved into two major parts "general" an "url"
-META = YCrawlConfig.get_json_by_name("general")
-GSBUCKET = META['bucket']
-RUN_MODE = META['scope']
-LIMIT_RETRY = META['max-retry']
+def meta_major():
+    META = YCrawlConfig.get_json_by_name("general")
+    return META['bucket'], META['scope'], META['max-retry']
 
-META = YCrawlConfig.get_json_by_name("url")
-META_URL = META['meta-url']
-META_IATA = META['meta-iata']
 
-# compute range of check in dates
-range_width = int((META['date-range-max'] - META['date-range-min']) / 4)
-date_adjusted_min = META['date-range-min'] - CONTROL_ID
-range_delta_days = [date_adjusted_min + CONTROL_ID * range_width + x for x in range(range_width)]
-HOTEL_CONFIG = META['active-hotel-config']
-HOTEL_CONFIG["checkin-list"] = [date.today() + timedelta(days=x) for x in range_delta_days]
+def meta_url_configs():
+    META = YCrawlConfig.get_json_by_name("url")
+    control_id = ((date.today() - date(1970,1,1)).days) % 4
 
-# compute qatar depature days
-interval_7 = range(min(range_delta_days), max(range_delta_days), 7)
-QR_CONFIG = META['active-qr-config']
-QR_CONFIG["dep-date-list"] = [date.today() + timedelta(days=x) for x in interval_7]
+    # compute range of check in dates
+    range_width = int((META['date-range-max'] - META['date-range-min']) / 4)
+    date_adjusted_min = META['date-range-min'] - control_id
+    range_delta_days = [date_adjusted_min + control_id * range_width + x for x in range(range_width)]
+    HOTEL_CONFIG = META['active-hotel-config']
+    HOTEL_CONFIG["checkin-list"] = [date.today() + timedelta(days=x) for x in range_delta_days]
+
+    # compute qatar depature days
+    interval_7 = range(min(range_delta_days), max(range_delta_days), 7)
+    QR_CONFIG = META['active-qr-config']
+    QR_CONFIG["dep-date-list"] = [date.today() + timedelta(days=x) for x in interval_7]
+
+    return HOTEL_CONFIG, QR_CONFIG
 
 
 
@@ -116,6 +49,9 @@ QR_CONFIG["dep-date-list"] = [date.today() + timedelta(days=x) for x in interval
 #   \___/|_| \_\_____|  \____|\___|_| |_|\___|_|  \__,_|\__\___/|_|   
                                                                     
 def url_qr(from1, to1, from2, to2, departure_date, layover_days):
+
+    META = YCrawlConfig.get_json_by_name("url")
+    META_IATA = META['meta-iata']
 
     return_date = departure_date + timedelta(days=layover_days)
 
@@ -138,6 +74,9 @@ def url_qr(from1, to1, from2, to2, departure_date, layover_days):
 
 
 def url_hotel(checkin, nights, hotel):
+
+    META = YCrawlConfig.get_json_by_name("url")
+    META_URL = META['meta-url']
 
     # find hotel code
     if hotel.lower() in META_URL.keys():
@@ -166,9 +105,11 @@ def url_hotel(checkin, nights, hotel):
 #   \___/|_| \_\_____|  \____\___/ \___/|_|  \__,_|_|_| |_|\__,_|\__\___/|_|   
                                                                              
 
-def get_keys_status(type=RUN_MODE):
+def get_keys_status():
+    
+    GSBUCKET, RUN_MODE, LIMIT_RETRY = meta_major()
+    DATE_STR = date.today().strftime("%Y%m%d")
 
-    # LOCAL files_in_storage = [x for x in listdir(cache_folder) if x.endswith(".pp")]
     gcp_client = storage.Client()
     bucket = gcp_client.get_bucket(GSBUCKET)
     files_in_storage = [x.name for x in bucket.list_blobs(
@@ -176,7 +117,7 @@ def get_keys_status(type=RUN_MODE):
 
     keys_completed = [
         DATE_STR + "_" + x.split("_")[1] for x in files_in_storage if not x.endswith("ERR.pp")]
-    # error keys may have duplicates, LIMIT_RETRY to remove it
+    # error keys may have duplicates, limit retry to remove it
     keys_error = [DATE_STR + "_" + x.split("_")[1]
                   for x in files_in_storage if x.endswith("ERR.pp")]
     keys_forfeit = [
@@ -189,10 +130,12 @@ def get_keys_status(type=RUN_MODE):
 def assign_seq(identifier):
     global NN
     NN += 1
-    return f"{DATE_STR}_{identifier}{NN:04}"
+    return f"{date.today().strftime('%Y%m%d')}_{identifier}{NN:04}"
 
 
 def fetch_all_urls(shuffled=True):
+    HOTEL_CONFIG, QR_CONFIG = meta_url_configs()
+
     global NN
     NN = 0
     urls_hotel = [{
@@ -233,7 +176,7 @@ def call_url_coordinator(batch=999, total_batches=1, no_check=False, type="ONE")
         output = "\n".join(bash_nodes) if type == "ONE" else bash_nodes
         return output
 
-    keys_done, keys_forfeit, keys_error = get_keys_status(RUN_MODE)
+    keys_done, keys_forfeit, keys_error = get_keys_status()
     urls_todo = [x for x in urls_all if x['key'] not in (keys_done + keys_forfeit)]
 
     if type == "INFO":

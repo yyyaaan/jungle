@@ -2,19 +2,9 @@ from json import dumps, loads
 from logging import getLogger
 
 from .secretmanager import *
-
 from ycrawl.models import VmRegistry
 
 logger = getLogger("commonlib")
-
-# changes from Flask project: print -> logger, all_vms from model format changed, messaging changed
-
-all_vms = VmRegistry.objects.all()
-GCP_VMLIST= dict([(x.vmid, x.zone) for x in all_vms if x.provider == "GCP"])
-AZURE_VMLIST = dict([(x.vmid, x.resource) for x in all_vms if x.provider == "Azure"])
-AWS_VMLIST = dict([(x.vmid, x.resource) for x in all_vms if x.provider == "AWS"])
-CSC_VMLIST = dict([(x.vmid, x.resource) for x in all_vms if x.provider == "CSC"])
-
 SECRET = loads(get_secret("ycrawl-credentials"))
 
 
@@ -33,11 +23,13 @@ import openstack
 openstack.enable_logging(debug=False)
 openstackconn = openstack.connect(cloud='openstack')
 
-def csc_list_instances(vm_names):
+def csc_list_instances():
+    vm_names = [x.vmid for x in VmRegistry.objects.filter(provider="CSC")]
+
     out_list, n_running = [], 0
     for instance in openstackconn.compute.servers():
         if str(instance.name) not in vm_names:
-            continue
+            logger.warn(f"CSC instance {instance.name} is not registered")
         out_list.append({
             "vmid": str(instance.name),
             "header": f"{instance.name} {instance.vm_state} (csc-nova)  {instance.flavor['original_name']}",
@@ -87,10 +79,9 @@ def csc_vm_shutdown(vmid):
 from google.cloud import compute_v1
 GCE_CLIENT = compute_v1.InstancesClient()
 
-def gcp_list_instances(zones=["europe-north1-c"]):
-
+def gcp_list_instances():
+    zones = [x.zone for x in VmRegistry.objects.filter(provider="GCP")]
     out_list, n_running = [], 0
-    # zones = zones + ["europe-north1-c", "us-east1-b"] # can contain duplicates
 
     for zone in set(zones):
         instance_list = GCE_CLIENT.list(project="yyyaaannn", zone=zone)
@@ -159,7 +150,8 @@ ACE_CLIENT = ComputeManagementClient(
 )
 
 
-def azure_list_instances(resource_groups=["VM-Workers"]):
+def azure_list_instances():
+    resource_groups=[x.resource for x in VmRegistry.objects.filter(provider="Azure")]
     out_list, n_running = [], 0
 
     for group in set(resource_groups):
@@ -216,31 +208,34 @@ import boto3
 
 def aws_get_client(instance_id):
     # client is region-binded, so need to determine proper cliente
-    aws_regions = dict([(x.resource, x.zone[:-1]) for x in all_vms if x.provider == "AWS"])
+    the_vm = VmRegistry.objects.filter(resource=instance_id).first()
 
     return boto3.client(
         "ec2",
-        region_name = aws_regions[instance_id],
+        region_name = the_vm.zone[:-1],
         aws_access_key_id=SECRET['AWS_ACCESS_KEY'],
         aws_secret_access_key=SECRET['AWS_SECRET']
     )
 
 
-def aws_list_instances(instance_ids=["i-05baaec0fe7fe4d66", "i-07a9cb47522f26bf8"]):
-
+def aws_list_instances():
+    instance_ids = [x.resource for x in VmRegistry.objects.filter(provider="AWS")]
     out_list, n_running = [], 0
 
-    instance_list = [aws_get_client(one_id).describe_instances(InstanceIds=[one_id]) for one_id in instance_ids]
-    
-    for instance_info in instance_list:
-        instance = instance_info['Reservations'][0]['Instances'][0]
-        out_list.append({
-            "vmid": str(instance['Tags'][0]['Value']),
-            "header": f"{instance['Tags'][0]['Value']} {instance['State']['Name'].upper()} ({instance['Placement']['AvailabilityZone']}) {instance['InstanceType']}",
-            "content": dumps(str(instance)).replace(", '", ",<br/>'")[2:-2]
-        })
-        if instance['State']['Name'] == 'running':
-            n_running +=1
+    try:
+        instance_list = [aws_get_client(one_id).describe_instances(InstanceIds=[one_id]) for one_id in instance_ids]
+        print("ok")
+        for instance_info in instance_list:
+            instance = instance_info['Reservations'][0]['Instances'][0]
+            out_list.append({
+                "vmid": str(instance['Tags'][0]['Value']),
+                "header": f"{instance['Tags'][0]['Value']} {instance['State']['Name'].upper()} ({instance['Placement']['AvailabilityZone']}) {instance['InstanceType']}",
+                "content": dumps(str(instance)).replace(", '", ",<br/>'")[2:-2]
+            })
+            if instance['State']['Name'] == 'running':
+                n_running +=1
+    except Exception as e:
+        logger.error(str(e))
 
     return n_running, out_list
 
@@ -281,30 +276,12 @@ def aws_vm_shutdown(vmid, instance_id):
 #########################################################
 
 def vm_list_all():
-    n_running, vm_list = 0, []
-    try:
-        n, vml = gcp_list_instances(list(GCP_VMLIST.values()))
-        n_running, vm_list = n_running + n, vm_list + vml
-    except Exception as e:
-        logger.error(str(e))
+    n1, vms1 = gcp_list_instances()
+    n2, vms2 = azure_list_instances()
+    n3, vms3 = aws_list_instances()
+    n4, vms4 = csc_list_instances()
 
-    try:
-        n, vml = azure_list_instances(list(AZURE_VMLIST.values()))
-        n_running, vm_list = n_running + n, vm_list + vml
-    except Exception as e:
-        logger.error(str(e))
-
-    try:
-        n, vml = aws_list_instances(list(AWS_VMLIST.values()))
-        n_running, vm_list = n_running + n, vm_list + vml
-    except Exception as e:
-        logger.error(str(e))
-
-    try:
-        n, vml = csc_list_instances(list(CSC_VMLIST.keys()))
-        n_running, vm_list = n_running + n, vm_list + vml
-    except Exception as e:
-        logger.error(str(e))
+    n_running, vm_list = n1+n2+n3+n4, vms1+vms2+vms3+vms4
 
     vm_list.sort(key=lambda x: x["header"])
     for i, x in enumerate(vm_list):
@@ -314,32 +291,37 @@ def vm_list_all():
 
 
 def vm_startup(vmid):
-    status, info = False, ""
     if str(vmid)[:4] == "test":
-        status, info = True, f"start {vmid} passed"
-    if vmid in GCP_VMLIST.keys():
-        status, info = gcp_vm_startup(vmid=vmid, zone=GCP_VMLIST[vmid])
-    if vmid in AZURE_VMLIST.keys():
-        status, info = azure_vm_startup(vmid=vmid, resource_group=AZURE_VMLIST[vmid])
-    if vmid in AWS_VMLIST.keys():
-        status, info = aws_vm_startup(vmid=vmid, instance_id=AWS_VMLIST[vmid])
-    if vmid in CSC_VMLIST.keys():
-        status, info = csc_vm_startup(vmid=vmid)
+        return True, f"start {vmid} passed"
 
-    return status, info
+    the_vm = VmRegistry.objects.filter(vmid=vmid).first()
+
+    if not the_vm:
+        return False, "VM not registered"
+    if the_vm.provider == "GCP":
+        return gcp_vm_startup(vmid=the_vm.vmid, zone=the_vm.zone)
+    if the_vm.provider == "Azure":
+        return azure_vm_startup(vmid=the_vm.vmid, resource_group=the_vm.resource)
+    if the_vm.provider == "AWS":
+        return aws_vm_startup(vmid=the_vm.vmid, instance_id=the_vm.resource)
+    if the_vm.provider == "CSC":
+        return csc_vm_startup(vmid=the_vm.vmid)
+
 
 
 def vm_shutdown(vmid):
-    status = False
     if str(vmid)[:4] == "test":
-        status, info = True, f"stop {vmid} passed"
-    if vmid in GCP_VMLIST.keys():
-        status, info = gcp_vm_shutdown(vmid=vmid, zone=GCP_VMLIST[vmid])
-    if vmid in AZURE_VMLIST.keys():
-        status, info = azure_vm_shutdown(vmid=vmid, resource_group=AZURE_VMLIST[vmid])
-    if vmid in AWS_VMLIST.keys():
-        status, info = aws_vm_shutdown(vmid=vmid, instance_id=AWS_VMLIST[vmid])
-    if vmid in CSC_VMLIST.keys():
-        status, info = csc_vm_shutdown(vmid=vmid)
+        return True, f"stop {vmid} passed"
 
-    return status, info
+    the_vm = VmRegistry.objects.filter(vmid=vmid).first()
+
+    if not the_vm:
+        return False, "VM not registered"
+    if the_vm.provider == "GCP":
+        return gcp_vm_shutdown(vmid=the_vm.vmid, zone=the_vm.zone)
+    if the_vm.provider == "Azure":
+        return azure_vm_shutdown(vmid=the_vm.vmid, resource_group=the_vm.resource)
+    if the_vm.provider == "AWS":
+        return aws_vm_shutdown(vmid=the_vm.vmid, instance_id=the_vm.resource)
+    if the_vm.provider == "CSC":
+        return csc_vm_shutdown(vmid=the_vm.vmid)
