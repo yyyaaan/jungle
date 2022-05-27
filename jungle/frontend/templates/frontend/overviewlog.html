@@ -1,0 +1,16 @@
+<!--this is partial html to be send via ajax-->
+<!--inside col s12 div tag -->
+<div class="card">
+    <div class="card-tabs">
+        <ul class="tabs tabs-fixed-width">
+            {% for one_log in logs_by_vm %}
+            <li class="tab"><a href="#{{one_log.name}}">{{one_log.name}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="card-content grey lighten-4">
+        {% for one_log in logs_by_vm %}
+        <div id="{{one_log.name}}"><pre style="max-height: 600px; overflow: auto;">{% autoescape off %}{{one_log.logs}}{% endautoescape %}</pre></div>
+        {% endfor %}
+    </div>
+</div>

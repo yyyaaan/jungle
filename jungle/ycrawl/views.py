@@ -11,7 +11,7 @@ from commonlib.ycrawlurlmaker import call_url_coordinator
 from commonlib.secretmanager import get_secret
 
 
-API_RENDERERS = [renderers.AdminRenderer, renderers.BrowsableAPIRenderer, renderers.JSONRenderer, renderers.JSONOpenAPIRenderer]
+API_RENDERERS = [renderers.BrowsableAPIRenderer, renderers.AdminRenderer, renderers.JSONRenderer, renderers.JSONOpenAPIRenderer]
 
 class RunData(views.APIView):
     """Call for data processor to run/stop (backward compatible actions)"""

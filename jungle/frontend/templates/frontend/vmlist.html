@@ -9,11 +9,12 @@
             <div class="collapsible-header"><i class="material-icons">{{vm.icon}}</i>{% autoescape off %}{{vm.header}}{% endautoescape %}</div>
             <div class="collapsible-body">
                 <div class="right-align">
-                    <form action="/vmaction/" method="post" target="outputarea" onsubmit="return confirm('Are you sure?');">
+                    <form action="/ycrawl/actions/" method="post" target="outputarea" onsubmit="return confirm('Are you sure?');">
                         {% csrf_token %}
-                        <input type="hidden" name="VMID" value="{{vm.vmid}}">
-                        <button class="btn-flat" name="ACTION" value="START">START</button>
-                        <button class="btn-flat" name="ACTION" value="STOP">STOP</button>
+                        <input type="hidden" name="vmids" value="{{vm.vmid}}">
+                        <input type="hidden" name="info" value="frontend/vms by {{user.get_username}}">
+                        <button class="btn-flat" name="event" value="START">START</button>
+                        <button class="btn-flat" name="event" value="STOP">STOP</button>
                     </form>
                 </div>
                 <div id="vm-detail" class="log-print" style="display: block;">

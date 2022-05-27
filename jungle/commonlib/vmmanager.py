@@ -43,7 +43,7 @@ def csc_list_instances(vm_names):
             "header": f"{instance.name} {instance.vm_state} (csc-nova)  {instance.flavor['original_name']}",
             "content": dumps(str(instance)).replace(", ", ",<br/>").replace('\\"', '"')[1:-1]
         })
-        if instance.status == 'active': 
+        if instance.vm_state == 'active': 
             n_running += 1
 
     return n_running, out_list
@@ -281,17 +281,36 @@ def aws_vm_shutdown(vmid, instance_id):
 #########################################################
 
 def vm_list_all():
-    n_running1, vm_list1 = gcp_list_instances(list(GCP_VMLIST.values()))
-    n_running2, vm_list2 = azure_list_instances(list(AZURE_VMLIST.values()))
-    n_running3, vm_list3 = aws_list_instances(list(AWS_VMLIST.values()))
-    n_running4, vm_list4 = csc_list_instances(list(CSC_VMLIST.keys()))
-    
-    vm_list = vm_list1 + vm_list2 + vm_list3 + vm_list4
+    n_running, vm_list = 0, []
+    try:
+        n, vml = gcp_list_instances(list(GCP_VMLIST.values()))
+        n_running, vm_list = n_running + n, vm_list + vml
+    except Exception as e:
+        logger.error(str(e))
+
+    try:
+        n, vml = azure_list_instances(list(AZURE_VMLIST.values()))
+        n_running, vm_list = n_running + n, vm_list + vml
+    except Exception as e:
+        logger.error(str(e))
+
+    try:
+        n, vml = aws_list_instances(list(AWS_VMLIST.values()))
+        n_running, vm_list = n_running + n, vm_list + vml
+    except Exception as e:
+        logger.error(str(e))
+
+    try:
+        n, vml = csc_list_instances(list(CSC_VMLIST.keys()))
+        n_running, vm_list = n_running + n, vm_list + vml
+    except Exception as e:
+        logger.error(str(e))
+
     vm_list.sort(key=lambda x: x["header"])
     for i, x in enumerate(vm_list):
         x["icon"] = f"filter_{i+1}"
 
-    return n_running1 + n_running2 + n_running3 + n_running4, vm_list
+    return n_running, vm_list
 
 
 def vm_startup(vmid):

@@ -1,0 +1,122 @@
+{% extends "parent.html" %}
+{% block title %} Resources and Service Status {% endblock %}
+
+
+{% block content %} 
+<div class="col s12 m3"  style="background-color:snow">
+    <h3>{{completed_percent}}</h3>
+    <p>Completion of scheduled</p>
+    <p><a href="{{gss_link}}" target="_blank">{{info_str}}</a></p>
+</div>
+<div class="col s12 m9">
+    <ul class="collapsible">
+        {% for one_brand in all_files %}
+        <li>
+            <div class="collapsible-header">[{{one_brand.len}}]  {{one_brand.brand}}</div>
+            <div class="collapsible-body">
+                <div class="row" style="max-height: 300px; overflow: auto;">
+                    {% for x in one_brand.list %}
+                    <div class="col s4"> {{x.desc}} {{x.key}}</div>
+                    <div class="col s4"> 
+                        <a href="{{x.uurl}}" target="_blank">[web]</a> 
+                        {% for y in x.link %}  <a href="{{y}}" target="_blank">[gs]</a>  {% endfor %}</div>
+                    <div class="col s4"> by {{x.server}} </div>
+                    {% endfor %}
+                </div>                
+            </div>
+        </li>
+        {% endfor %}
+    </ul>     
+</div>
+{% endblock %}
+
+
+{% block contentmore %} 
+<div class="col s12 m9">
+    <div id='chart' class='chart'></div>
+    <div id="vmplot">
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        <div class="middle">
+            <div class="bar bar1"></div><div class="bar bar2"></div><div class="bar bar3"></div><div class="bar bar4"></div>
+            <div class="bar bar5"></div><div class="bar bar6"></div><div class="bar bar7"></div><div class="bar bar8"></div>
+        </div>    
+    </div>
+</div>
+<div class="col s12 m3"  style="background-color:snow">
+    <h3>{{n_jobs}}</h3>
+    <p>{% autoescape off %}{{jobs_detail}}{% endautoescape %}</p>
+    <p><a href="/rundata"> <i class="small material-icons">assessment</i> </a>  
+       <a href="{{gso_link}}" target="_blank"><i class="small material-icons">folder_open</i></a>  
+       <a href="https://datastudio.google.com/reporting/d69d4892-6779-4d66-8b38-2fee9fd00dc1/page/kE3mC" target="_blank"><i class="small material-icons">dashboard</i> </a>
+    </p>
+</div>
+<button id="log-btn" class="waves-effect waves-light btn-flat right" onclick="showLog()">click to load logs</button>
+{% endblock %}
+
+
+{% block contentevenmore %} 
+<div id="log-boxes" class="col s12" style="display:none">
+    <div class="middle">
+        <div class="bar bar1"></div><div class="bar bar2"></div><div class="bar bar3"></div><div class="bar bar4"></div>
+        <div class="bar bar5"></div><div class="bar bar6"></div><div class="bar bar7"></div><div class="bar bar8"></div>
+    </div>    
+</div>
+{% endblock %}
+
+
+{% block head %}
+<script>
+    window.setTimeout(function () {
+        $.ajax({
+            url: '/overview/vmplot/',
+            data: {"width": $('#vmplot').width()},
+            success: function(data) {
+                $('#vmplot').html(data);
+            }
+        });
+    }, 999);    
+    function showLog() {
+        $('#log-btn').hide();
+        $('#log-boxes').show();
+        $.ajax({
+            url: '/overview/log/',
+            success: function(data) {
+                $('#log-boxes').html(data);
+                $('.tabs').tabs();
+            }
+        });
+    };
+</script>
+<style>
+    .middle {
+        margin-top: 100px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute;
+    }
+    .bar {
+        width: 10px;
+        height: 70px;
+        background: #fff;
+        display: inline-block;
+        transform-origin: bottom center;
+        border-top-right-radius: 20px;
+        border-top-left-radius: 20px;
+        animation: loader 1.2s linear infinite;
+    }
+    .bar1 { animation-delay: 0.1s;} 
+    .bar2 {animation-delay: 0.2s;}
+    .bar3 {animation-delay: 0.3s;}
+    .bar4 {animation-delay: 0.4s;}
+    .bar5 {animation-delay: 0.5s;}
+    .bar6 {animation-delay: 0.6s;}
+    .bar7 {animation-delay: 0.7s;}
+    .bar8 {animation-delay: 0.8s;}
+
+    @keyframes loader {
+        0% {transform: scaleY(0.1);}
+        50% {transform: scaleY(1); background: antiquewhite;}
+        100% {transform: scaleY(0.1);background: transparent;}
+    }
+</style>
+{% endblock %}

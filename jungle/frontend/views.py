@@ -10,7 +10,9 @@ from json import loads, dumps
 
 from .models import *
 from commonlib.vmmanager import vm_list_all
+from .scripts import *
 from ycrawl.serializers import *
+
 
 # helper function (will be called be sitemap)
 def make_sidenav():
@@ -68,7 +70,7 @@ def get_urls(request):
     prev_cnt = SiteUrl.objects.all().count()
     for one in sorted(all_urls):
         if SiteUrl.objects.filter(rawurl=one).count() == 0:
-            item = SiteUrl(rawurl=one, cleanurl=one, menu1=123456, menu2=123456)
+            item = SiteUrl(rawurl=one, cleanurl=one, menu1=123456, menu2=123456, menu3=123456)
             item.save()
 
 
@@ -82,9 +84,6 @@ def get_urls(request):
     make_sidenav()
 
     return render(request, 'frontend/index.html', pagedata)
-
-
-
 
 
 
@@ -116,53 +115,36 @@ def vm_management(request):
     return render(request, 'frontend/vmlist.html', {"debug_text": info, "vm_table": vms})
 
 
+
+def job_overview(request):
+    info, n_all, n_todo, n_done, n_forfeit, n_error, nu_error =  call_url_coordinator(type="INFO")
+    all_files, info_str = storage_file_viewer()
+
+    pagedata=dict(
+        completed_percent = f"{(1-n_todo/n_all):.2%}",
+        n_jobs = f"{n_all-n_todo}/{n_all}",
+        jobs_detail = f"{n_done} completed<br/>{nu_error}({n_error})+{n_forfeit} issues",
+        jobs_str = info,
+        info_str = f"  {DATE_STR[4:]}  {info_str}",
+        all_files = all_files,
+        gss_link = f"https://console.cloud.google.com/storage/browser/{GSBUCKET}/{RUN_MODE}/{datetime.now().strftime('%Y%m/%d')}",
+        gso_link = f"https://console.cloud.google.com/storage/browser/yyyaaannn-us/yCrawl_Output/{datetime.now().strftime('%Y%m')}",
+    )
+
+    return render(request, 'frontend/overview.html', pagedata)
+
+
 @login_required(login_url='/admin/login/')
-def vm_action(request):
-    if request.method != "POST":
-        return HttpResponseForbidden()
-    
-    """Peform Action using Serializer"""
-    action_serializer = VmActionSerializer(data={
-        "vmids": [request.POST.get("VMID")],
-        "event": request.POST.get("ACTION"),
-        "info": f"Frontend action by user [{request.user.username}]" 
-    })        
-    if action_serializer.is_valid(raise_exception=True):
-        action_serializer.save()
-    else:
-        logger.info(f"Frontend VM Action failed for [{request.user.username}]")
-        return HttpResponseBadRequest()
-
-    """Get some data"""
-    nice_br = "<br/>" #<span style='color:transparent'>00:00:00 </span>"
-    logs = [
-        f"""
-        === {x.timestamp.strftime('%H:%M:%S')} {x.event}
-        <i>{','.join([xx.vmid for xx in x.vmids.all()])}</i> ===
-        {nice_br} {x.result}
-        {nice_br} {x.info}
-        """ for x in VmActionLog.objects.filter(timestamp__gte=date.today()).order_by("-timestamp")[:10]
-    ]
-    trails = [
-        f"{x.timestamp.strftime('%H:%M:%S')} {x.event} {x.vmid} {nice_br} {x.info}" 
-        for x in VmTrail.objects.filter(timestamp__gte=date.today()).order_by("-timestamp")[:10]
-    ]
-
-    payload = {
-        "h1text": "VM Action Submitted",
-        "mainhtml": f"""
-            <p>Below are abstract of Today's latest 10 activity log.</p>
-            <p>{"</p><p>".join(logs)}</p>
-            <p>{"</p><p>".join(trails)}</p>
-            <p>
-                <a target='_blank' href='/ycrawl/actions/'> Action Log</a> | 
-                <a target='_blank' href='/ycrawl/trails/'> Trails </a>
-            </p>    
-        """
-    }
-
-    return render(request, 'minimal.html', payload)
+def job_overview_log(request):
+    return render(request, "frontend/overviewlog.html", {"logs_by_vm": get_simple_log()})
 
 
-
+def job_overview_vmplot(request):
+    _, vm_list = vm_list_all()
+    pagedata = {"graphJSON": get_geoplot_json(
+        vms=vm_list, 
+        height=int(0.5 * int(request.GET["width"])), 
+        width=int(request.GET["width"])
+    )}
+    return render(request, 'frontend/overviewvmplot.html', pagedata)
 

@@ -4,6 +4,73 @@ from google.cloud import storage
 
 from ycrawl.models import *
 
+# to be optimized
+CLUSTER= [
+        {
+            "batch": 0,
+            "name": "ycrawl-1-pl",
+            "zone": "europe-central2-b",
+            "resource": "default",
+            "provider": "GCP"
+        },
+        {
+            "batch": 1,
+            "name": "ycrawl-2-fi",
+            "zone": "europe-north1-b",
+            "resource": "default",
+            "provider": "GCP"
+        },
+        {
+            "batch": 2,
+            "name": "ycrawl-3-se",
+            "zone": "eu-north-1c",
+            "resource": "i-05baaec0fe7fe4d66",
+            "provider": "AWS"
+        },
+        {
+            "batch": 3,
+            "name": "ycrawl-4-fr",
+            "zone": "eu-west-3b",
+            "resource": "i-07a9cb47522f26bf8",
+            "provider": "AWS"
+        },
+        {
+            "batch": 4,
+            "name": "ycrawl-5r-ie",
+            "zone": "northeurope",
+            "resource": "yCrawl",
+            "provider": "Azure"
+        },
+        {
+            "batch": 5,
+            "name": "ycrawl-6r-nl",
+            "zone": "westeurope",
+            "resource": "yCrawl",
+            "provider": "Azure"
+        },
+        {
+            "batch": 6,
+            "name": "ycrawl-7-csc",
+            "zone": "nova",
+            "resource": "yCrawl",
+            "provider": "CSC"
+        },
+	{
+            "batch": 7,
+            "name": "ycrawl-8-csc",
+            "zone": "nova",
+            "resource": "yCrawl",
+            "provider": "CSC"
+        },
+	{
+            "batch": 8,
+            "name": "ycrawl-9-csc",
+            "zone": "nova",
+            "resource": "yCrawl",
+            "provider": "CSC"
+        }
+    ]
+
 
 
 #   _  __            ____                                _                
@@ -17,7 +84,7 @@ DATE_STR = date.today().strftime("%Y%m%d")
 CONTROL_ID = ((date.today() - date(1970,1,1)).days) % 4
 
 # META is now saved into two major parts "general" an "url"
-META = META = YCrawlConfig.get_json_by_name("general")
+META = YCrawlConfig.get_json_by_name("general")
 GSBUCKET = META['bucket']
 RUN_MODE = META['scope']
 LIMIT_RETRY = META['max-retry']

@@ -207,6 +207,10 @@ if not DEBUG:
                 'handlers': ['console', 'logfile'],
                 'level': 'INFO',
             },
+            'webreader': {
+                'handlers': ['console', 'logfile'],
+                'level': 'INFO',
+            },
             'frontend': {
                 'handlers': ['console', 'logfile'],
                 'level': 'INFO',

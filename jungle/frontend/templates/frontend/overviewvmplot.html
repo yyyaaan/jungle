@@ -1,0 +1,3 @@
+<!--this is partial html to be send via ajax-->
+<!--plotly js file and empty div id=chart preloaded in main html -->
+<script type='text/javascript'> var graphs = {{graphJSON | safe}}; Plotly.plot('chart',graphs,{});</script>
