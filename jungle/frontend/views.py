@@ -8,8 +8,8 @@ from datetime import date
 from logging import getLogger
 from json import loads, dumps
 
-from .models import *
-from .scripts import *
+from frontend.models import *
+from frontend.scripts import *
 from ycrawl.vmmanager import vm_list_all
 from ycrawl.serializers import *
 
@@ -119,19 +119,25 @@ def vm_management(request):
 
 def job_overview(request):
 
-    GSBUCKET, RUN_MODE, _ = meta_major()
+    meta = YCrawlConfig.get_json_by_name("general")
+    gsbucket, runmode = meta['bucket'], meta['scope']
+    
+    jobs = BatchJobList.get_today_objects()
+    n_all, n_todo = jobs.count(), jobs.filter(completion=False).count() 
+    n_forfeit = jobs.filter(note__startswith="X").count()
+    n_error = jobs.filter(note__endswith="E").exclude(note__startswith="X").count()
+    n_ok = jobs.filter(completion=True).exclude(note__startswith="X").count()
 
-    info, n_all, n_todo, n_done, n_forfeit, n_error, nu_error =  call_url_coordinator(type="INFO")
-    all_files, info_str = storage_file_viewer()
+    all_files, info_str = storage_file_viewer(gsbucket, runmode, jobs)
 
     pagedata=dict(
         completed_percent = f"{(1-n_todo/n_all):.2%}",
         n_jobs = f"{n_all-n_todo}/{n_all}",
-        jobs_detail = f"{n_done} completed<br/>{nu_error}({n_error})+{n_forfeit} issues",
-        jobs_str = info,
+        jobs_detail = f"{n_ok} completed ok<br/>{n_error}+{n_forfeit} issues",
+        jobs_str = "there is nothing in this version",
         info_str = f"  {info_str}",
         all_files = all_files,
-        gss_link = f"https://console.cloud.google.com/storage/browser/{GSBUCKET}/{RUN_MODE}/{datetime.now().strftime('%Y%m/%d')}",
+        gss_link = f"https://console.cloud.google.com/storage/browser/{gsbucket}/{runmode}/{datetime.now().strftime('%Y%m/%d')}",
         gso_link = f"https://console.cloud.google.com/storage/browser/yyyaaannn-us/yCrawl_Output/{datetime.now().strftime('%Y%m')}",
     )
 

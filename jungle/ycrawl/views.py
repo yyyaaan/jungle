@@ -2,62 +2,75 @@
 # Create your views here.
 from rest_framework import viewsets, views, permissions, renderers, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
+
 from django.shortcuts import render
 from datetime import date
 
-from .models import *
-from .serializers import *
-from .ycrawlurlmaker import call_url_coordinator
+from ycrawl.models import *
+from ycrawl.serializers import *
+from ycrawl.ycrawlurl import YCrawlJobs
 from jungle.authentication import get_secret
 
 
+class BatchJobListViewSet(viewsets.ReadOnlyModelViewSet):
+    """Provide (read-only) list of batch jobs; parse any value to completion to see full list"""
+    queryset = BatchJobList.get_today_objects()
+    serializer_class = BatchJobListSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-class GetNodeJobs(views.APIView):
-    """Provide list of NodeJS jobs for yCrawl nodes"""
+    def get_queryset(self):
+        vmid = self.request.query_params.get("vmid", None)
+        completion = self.request.query_params.get("completion", False)
 
-    def __init__(self):
-        self.debug = True
-        # get total batches based on started VMs
-        qualified_log = VmActionLog.objects.filter(
-            info__icontains = "API start-ycrawl",
-            timestamp__gte = date.today(),
-        )
-        if not self.debug:
-            qualified_log.filter(event="START")
+        res = BatchJobList.get_today_objects()
+        if not completion:
+            res = res.filter(completion=completion)
+        if vmid:
+            res = res.filter(vmid=vmid)
+        return res
 
-        working_vms = qualified_log.last().vmids.all() if len(qualified_log) else VmRegistry.objects.filter(role="crawler")
-        self.batchref = dict([(x.vmid, x.batchnum) for x in working_vms])
-        self.batchref["all"] = 999
+    @action(methods=['GET'], detail=False)
+    def nodejobs(self, request, **kwargs):
+        """Plain results for nodejs worker, vmid mandatory"""
+        vmid = self.request.query_params.get("vmid", None) 
+        if not vmid:
+            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
         
-    def get(self, request, format=None):
-        if format=="CRON": 
-            return call_url_coordinator(no_check=self.debug, type="LIST"), self.batchref
+        records = BatchJobList.get_today_objects().filter(vmid=vmid, completion=False)
+        output = "\n".join([x.nodejob for x in records])
 
-        if 'vmid' not in request.query_params or request.query_params["vmid"] not in self.batchref:
-            return Response({"message": "invalid vmid"}, status=status.HTTP_406_NOT_ACCEPTABLE)
-
-        batchn = self.batchref[request.query_params["vmid"]]
-        output = call_url_coordinator(
-            batch = batchn,
-            total_batches = len(self.batchref),
-            no_check = self.debug,
-            type = "ONE"
-        )
-
-        n_output = len(output.split('\n'))
-        trail_serializer = VmTrailSerializer(data={
-            "vmid": request.query_params["vmid"],
-            "event": "NodeJS jobs requested",
-            "info": f"{n_output} jobs returned for batch-{batchn}" 
-        })        
-        if trail_serializer.is_valid(raise_exception=True):
-            trail_serializer.save()
-
+        # create a trail
+        VmTrail(vmid=vmid, event="GET joblist/nodejobs", info=f"{records.count()} returned").save()
         return render(request, "ycrawl/raw.html", {"output": output})
 
 
+class VmActionLogViewSet(viewsets.ModelViewSet):
+    """API endpoint for Vm Actions. POST will trigger actions. Decorate for notification"""
+    queryset = VmActionLog.objects.all().order_by("-timestamp")
+    serializer_class = VmActionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(methods=['POST'], detail=False)
+    def notifydone(self, request, *args, **kwargs):
+        """Plain results for nodejs worker, vmid mandatory"""
+        # shutdown the VM
+        action_serializer = VmActionSerializer(data={
+            "vmids": [request.data["VMID"]],
+            "event": "STOP",
+            "info": "notifydone endpoint", 
+        })        
+        if action_serializer.is_valid(raise_exception=True):
+            action_serializer.save()
+        
+        # 
+        YCrawlJobs().on_vm_completed(min_percentage=0.98)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
 class StartYcrawl(views.APIView):
-    """Start yCrawl endpoints"""
+    """Start yCrawl endpoints; register jobs and start vms"""
     permission_classes = [permissions.IsAuthenticated]
 
     def __init__(self):
@@ -65,9 +78,12 @@ class StartYcrawl(views.APIView):
         self.isstart = True
     
     def start_ycrawl(self):
-        vm_table = VmRegistry.objects.raw(f"select * from ycrawl_vmregistry where role='{self.vmrole}'")
+        vm_table = VmRegistry.objects.filter(role=self.vmrole)
 
         if len(vm_table):
+            # register today's job; pk contronls non-dup
+            YCrawlJobs().register_jobs()
+            # start vms
             action_serializer = VmActionSerializer(data={
                 "vmids": [x.vmid for x in vm_table],
                 "event": ("START" if self.isstart else "STOP"),
@@ -75,6 +91,12 @@ class StartYcrawl(views.APIView):
             })        
             if action_serializer.is_valid(raise_exception=True):
                 action_serializer.save()
+            # add a trail
+            VmTrail(
+                vmid=", ".join([x.vmid.vmid for x in vm_table]), 
+                event="Start yCrawl endpoint", 
+                info=f"{vm_table.count()} called (IsStart={self.isstart})"
+            ).save()
         else:
             logger.info("No VM satisfies the given criteria.")
 
@@ -90,7 +112,6 @@ class StartYcrawl(views.APIView):
         self.vmrole = request.data['role'] if 'role' in request.data else "crawler"
         self.isstart = False if 'stop' in request.data else True
         vmids = [x.vmid for x in self.start_ycrawl()]
-        if format=="CRON": return "OK"
         return Response({"success": True, "vm_applied": vmids}, status=status.HTTP_202_ACCEPTED)
 
 
@@ -98,26 +119,6 @@ class VmViewSet(viewsets.ModelViewSet):
     """VM Registry. Update in admin or via API."""
     queryset = VmRegistry.objects.all().order_by("vmid")
     serializer_class = VmSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        """optional filters"""        
-        project = self.request.query_params.get("project", None)
-        role = self.request.query_params.get("role", None)
-        if project and role:
-            return VmRegistry.objects.filter(project=project, role=role)
-        if project:
-            return VmRegistry.objects.filter(project=project)
-        if role:
-            return VmRegistry.objects.filter(role=role)
-
-        return super().get_queryset()
-
-
-class VmActionLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for Vm Actions. POST will trigger actions"""
-    queryset = VmActionLog.objects.all().order_by("-timestamp")
-    serializer_class = VmActionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 

@@ -21,7 +21,14 @@ class VmActionLogAdmin(admin.ModelAdmin):
     list_filter = ["event", "timestamp"]
 
 
+class BatchJobListAdmin(admin.ModelAdmin):
+    # many-to-many use the Model Function name
+    list_display = ("jobid", "vmid", "completion", "note", "weburl")
+    list_filter = ["completion", "note", "vmid"]
+
+
 admin.site.register(VmRegistry, VmRegistryAdmin)
 admin.site.register(VmTrail, VmTrailAdmin)
 admin.site.register(VmActionLog, VmActionLogAdmin)
 admin.site.register(YCrawlConfig, YCrawlConfigAdmin)
+admin.site.register(BatchJobList, BatchJobListAdmin)

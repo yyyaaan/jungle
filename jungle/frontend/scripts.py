@@ -1,10 +1,12 @@
 from json import dumps
-from datetime import datetime
+from datetime import date, datetime
 from google.cloud import storage, logging as gcplogging
 from plotly.utils import PlotlyJSONEncoder
 import plotly.express as px
 
-from ycrawl.ycrawlurlmaker import *
+from ycrawl.models import *
+
+
 
 
 #          ____                    _   __  __             _ _             
@@ -15,39 +17,21 @@ from ycrawl.ycrawlurlmaker import *
 #   |___/                                                                 
 
 
-def storage_file_viewer():
+def storage_file_viewer(gsbucket, runmode, job_object):
     
-    GSBUCKET, RUN_MODE, _ = meta_major()
-    
-    bucket = storage.Client().get_bucket(GSBUCKET)
-    all_files = [x.name for x in bucket.list_blobs(prefix=f'{RUN_MODE}/{datetime.now().strftime("%Y%m/%d")}')]
+    bucket = storage.Client().get_bucket(gsbucket)
+    all_files = [x.name for x in bucket.list_blobs(prefix=f'{runmode}/{datetime.now().strftime("%Y%m/%d")}')]
     info_str = "All scheduled tasks done." if len([x for x in all_files if "meta_on_completion" in x]) else "In progress..."
-        
-    all_uurls = fetch_all_urls()
-    uurls_by_key = dict([(x['key'].split("_")[1], x['url']) for x in all_uurls])
-
-    revert_batch = dict([
-        (x.batchnum, x.vmid) for x in 
-        VmRegistry.objects.filter(project="yCrawl", role="crawler")
-    ])
-
-    main_list_draft = [{
-        "key": the_key,
-        "batchn": int(the_key[1:]) % len(revert_batch),
-        "link": [f'https://storage.cloud.google.com/{GSBUCKET}/{x}' for x in all_files if f"_{the_key}_" in x],
-        "uurl": uurls_by_key[the_key]
-    } for the_key in [x['key'].split("_")[1] for x in all_uurls] ]
-
-    count_err_ok = lambda lst: f"{len([y for y in lst if 'ERR' not in y])}OK{len([y for y in lst if 'ERR' in y])}E"
-
+    
     main_list = [{
-        "key": x["key"],
-        "server": revert_batch[x["batchn"]],
-        "brand": x["uurl"].split(".")[1].upper(),
-        "desc": count_err_ok(x["link"]).replace("0E", "").replace("1OK","OK").replace("0OK", ""),
-        "link": x["link"],
-        "uurl": x["uurl"]
-    } for x in main_list_draft]
+        "key": x.jobid.split("_")[1],
+        "server": x.vmid.vmid,
+        "brand": x.weburl.split(".")[1].upper(),
+        "desc": ("" if x.note[:1] == "X" else "OK") + x.note.replace("X", ""),
+        "link": [f'https://storage.cloud.google.com/{gsbucket}/{xx}' for xx in all_files if x.jobid in xx],
+        "uurl": x.weburl
+    } for x in job_object]
+
 
     unique_brands = set([x['brand'] for x in main_list])
 

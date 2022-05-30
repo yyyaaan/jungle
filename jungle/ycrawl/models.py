@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from datetime import timedelta
+from datetime import date, timedelta
 from logging import getLogger
 from json import loads
 
@@ -30,7 +30,7 @@ class VmTrail(models.Model):
         return self.timestamp >= (timezone.now() - timedelta(days=1)) 
 
     def __str__(self):
-        return f"{self.event} from {self.vm} on {self.timestamp}"
+        return f"{self.event} from {self.vmid} on {self.timestamp}"
 
 
 class VmActionLog(models.Model):
@@ -51,20 +51,42 @@ class VmActionLog(models.Model):
 class YCrawlConfig(models.Model):
     """Simple Tabular Data, contains validated JSON fields"""
     name = models.CharField(max_length=1023, primary_key=True)
-    value = models.TextField("Value (json as str)", max_length=65535, blank=True)
+    value = models.TextField("Value (str / json as str)", max_length=65535, blank=True)
 
     @classmethod
     def get_json_by_name(cls, name):
         return loads(cls.objects.get(pk=name).value)
 
     def clean(self):
-        """Reject ill-formed vlaue"""
-        try:
-            loads(self.value)
-        except Exception as e:
-            raise ValidationError({"value": f"Invalid JSON. {str(e)}"})
+        """Reject ill-formed json"""
+        if ":" in self.value:
+            try:
+                loads(self.value)
+            except Exception as e:
+                raise ValidationError({"value": f"Invalid JSON. {str(e)}"})
         return self
 
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+    
+class BatchJobList(models.Model):
+    """Job List with Assigned VMID"""
+    jobid = models.CharField(max_length=100, primary_key=True)
+    vmid = models.ForeignKey(VmRegistry, on_delete=models.CASCADE)
+    weburl = models.CharField(max_length=65535)
+    completion = models.BooleanField("Completed?", default=False)
+    note = models.CharField(max_length=1023, blank=True)
+
+    @property
+    def nodejob(self):
+        return f'node node_handler.js {self.jobid} "{self.weburl}"'
+
+    @classmethod
+    def get_today_objects(cls):
+        return cls.objects.filter(jobid__startswith=date.today().strftime("%Y%m%d"))
+
+
+
+

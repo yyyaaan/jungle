@@ -1,8 +1,8 @@
 from json import loads, decoder
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, ValidationError
 
-from .models import *
-from .vmmanager import *
+from ycrawl.models import *
+from ycrawl.vmmanager import *
 
 
 def perform_action(validated_request):
@@ -60,4 +60,10 @@ class VmTrailSerializer(ModelSerializer):
 class YCrawlConfigSerializer(ModelSerializer):
     class Meta:
         model = YCrawlConfig
+        fields = '__all__'
+
+
+class BatchJobListSerializer(ModelSerializer):
+    class Meta:
+        model = BatchJobList
         fields = '__all__'
