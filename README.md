@@ -18,14 +18,13 @@ To set up a new model and its database, go to `settings.py` to INATALLED_APPS, a
 |Frontend| only views (urls, apps), model is imported from other modules|
 |URL management| App-by-app in each `app/urls.py`|
 |Fixtures| Initial data are saved to fixtures.json in single file|
-|API Token | Only admin can generate; Bearer set in root|
+|API Token | Only admin can generate; Bearer settings in jungle|
 |Permissions | Default is IsAuthenticated, but explicited expressed everywhere|
 |2FA| Admin-site enforced OTP authenticator |
 |Logger| App-centralized config in `models.py` under each module |
 |Cron Job| App-by-app `django-extension` ; crontab need to add manually| 
 
-Single action is performed in `xxActionSerializer` class; job action group is done in `views(APIView)`. Functionalities are implemented `lib_*.py` files.
-
+Single action is performed in `xxActionSerializer` class; job action group is done in `views(APIView)`. Common libraries are limited and organized in major user-module. Shared things under root (jungle/jungle).
 
 ## Deployment checklist
 

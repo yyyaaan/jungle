@@ -2,7 +2,7 @@ from django.db import models
 from django.db import models
 from logging import getLogger
 
-from commonlib.secretmanager import get_secret
+from jungle.authentication import get_secret
 
 logger = getLogger("messenger")
 

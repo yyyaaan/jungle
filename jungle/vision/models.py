@@ -6,7 +6,7 @@ from google.cloud import vision
 from logging import getLogger
 from base64 import b64encode, b64decode
 
-from commonlib.secretmanager import get_secret
+from jungle.authentication import get_secret
 from jungle.settings import BASE_DIR
 
 logger = getLogger("vision")

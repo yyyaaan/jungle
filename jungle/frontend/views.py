@@ -9,8 +9,8 @@ from logging import getLogger
 from json import loads, dumps
 
 from .models import *
-from commonlib.vmmanager import vm_list_all
 from .scripts import *
+from ycrawl.vmmanager import vm_list_all
 from ycrawl.serializers import *
 
 

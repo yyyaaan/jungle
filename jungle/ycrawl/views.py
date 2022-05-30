@@ -7,33 +7,8 @@ from datetime import date
 
 from .models import *
 from .serializers import *
-from commonlib.ycrawlurlmaker import call_url_coordinator
-from commonlib.secretmanager import get_secret
-
-
-API_RENDERERS = [renderers.BrowsableAPIRenderer, renderers.AdminRenderer, renderers.JSONRenderer, renderers.JSONOpenAPIRenderer]
-
-class RunData(views.APIView):
-    """Call for data processor to run/stop (backward compatible actions)"""
-    #permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        if "AUTH" not in request.data or request.data["AUTH"] != get_secret("ycrawl-simple-auth"):
-            return Response({"success": False}, status=status.HTTP_403_FORBIDDEN)
-
-        try:
-            action_serializer = VmActionSerializer(data={
-                "vmids": [request.data['VMID']],
-                "event": ("STOP" if "STOP" in request.data else "START"),
-                "info": "called from rundata endpoints" 
-            })        
-            if action_serializer.is_valid(raise_exception=True):
-                action_serializer.save()
-
-            return Response({"success": True}, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            logger.error(str(e))
-            return Response({"success": False}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+from .ycrawlurlmaker import call_url_coordinator
+from jungle.authentication import get_secret
 
 
 
@@ -124,7 +99,6 @@ class VmViewSet(viewsets.ModelViewSet):
     queryset = VmRegistry.objects.all().order_by("vmid")
     serializer_class = VmSerializer
     permission_classes = [permissions.IsAuthenticated]
-    renderer_classes = API_RENDERERS
 
     def get_queryset(self):
         """optional filters"""        
@@ -145,7 +119,6 @@ class VmActionLogViewSet(viewsets.ModelViewSet):
     queryset = VmActionLog.objects.all().order_by("-timestamp")
     serializer_class = VmActionSerializer
     permission_classes = [permissions.IsAuthenticated]
-    renderer_classes = API_RENDERERS
 
 
 class VmTrailViewSet(viewsets.ModelViewSet):
@@ -153,7 +126,6 @@ class VmTrailViewSet(viewsets.ModelViewSet):
     queryset = VmTrail.objects.all().order_by("-timestamp")
     serializer_class = VmTrailSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    renderer_classes = API_RENDERERS
 
 
 class YCrawlConfigViewSet(viewsets.ModelViewSet):
@@ -161,4 +133,3 @@ class YCrawlConfigViewSet(viewsets.ModelViewSet):
     queryset = YCrawlConfig.objects.all().order_by("name")
     serializer_class = YCrawlConfigSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    renderer_classes = API_RENDERERS

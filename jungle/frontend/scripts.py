@@ -4,7 +4,7 @@ from google.cloud import storage, logging as gcplogging
 from plotly.utils import PlotlyJSONEncoder
 import plotly.express as px
 
-from commonlib.ycrawlurlmaker import *
+from ycrawl.ycrawlurlmaker import *
 
 
 #          ____                    _   __  __             _ _             

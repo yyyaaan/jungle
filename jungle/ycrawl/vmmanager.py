@@ -1,10 +1,9 @@
 from json import dumps, loads
 from logging import getLogger
 
-from .secretmanager import *
+from jungle.authentication import get_secret
 from ycrawl.models import VmRegistry
 
-logger = getLogger("commonlib")
 SECRET = loads(get_secret("ycrawl-credentials"))
 
 

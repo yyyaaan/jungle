@@ -4,7 +4,7 @@ from linebot.models import TextSendMessage, FlexSendMessage
 from json import loads
 
 from .models import *
-from commonlib.secretmanager import get_secret
+from jungle.authentication import get_secret
 
 class MessengerSerializer(ModelSerializer):
 

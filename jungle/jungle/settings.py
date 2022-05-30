@@ -30,18 +30,16 @@ DEBUG = (getenv("djangodebug") == None)
 
 ALLOWED_HOSTS = [
     "35.228.1.223",
-    "127.0.0.1",
-    "localhost",
+    "127.0.0.1", "localhost",
     "new.yan.fi",
-    "yanpan.fi",
-    "yan.fi",
+    "yanpan.fi", "www.yanpan.fi",
+    "yan.fi", "www.yan.fi"
     "86.50.253.249",
 ]
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'play',
     'webreader',
@@ -111,13 +109,18 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'ycrawl.authentication.BearerAuthentication',
+        'jungle.authentication.BearerAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.AdminRenderer',
+        'rest_framework.renderers.JSONOpenAPIRenderer'
+    ]
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -182,7 +185,7 @@ if not DEBUG:
                 'level':'DEBUG',
                 'class':'logging.handlers.RotatingFileHandler',
                 'filename': "jungle.log",
-                'maxBytes': 50000,
+                'maxBytes': int(1e6) ,
                 'backupCount': 2,
                 'formatter': 'verbose',
             },
@@ -194,37 +197,37 @@ if not DEBUG:
         },
         'loggers': {
             'django': {
-                'handlers':['console', 'logfile'],
+                'handlers': ['logfile'], #'console' not used in prod
                 'propagate': True,
                 'level':'INFO',
             },
             'django.db.backends': {
-                'handlers': ['console', 'logfile'],
+                'handlers': ['logfile'],
                 'level': 'INFO',
                 'propagate': False,
             },
-            'ycrawl': {
-                'handlers': ['console', 'logfile'],
-                'level': 'INFO',
-            },
-            'webreader': {
-                'handlers': ['console', 'logfile'],
-                'level': 'INFO',
-            },
             'frontend': {
-                'handlers': ['console', 'logfile'],
-                'level': 'INFO',
-            },
-            'vision': {
-                'handlers': ['console', 'logfile'],
-                'level': 'INFO',
-            },
-            'commonlib': {
-                'handlers': ['console', 'logfile'],
+                'handlers': ['logfile'],
                 'level': 'INFO',
             },
             'messenger': {
-                'handlers': ['console', 'logfile'],
+                'handlers': ['logfile'],
+                'level': 'INFO',
+            },
+            'webreader': {
+                'handlers': ['logfile'],
+                'level': 'INFO',
+            },
+            'vision': {
+                'handlers': ['logfile'],
+                'level': 'INFO',
+            },
+            'yancv': {
+                'handlers': ['logfile'],
+                'level': 'INFO',
+            },
+            'ycrawl': {
+                'handlers': ['logfile'],
                 'level': 'INFO',
             },
         }

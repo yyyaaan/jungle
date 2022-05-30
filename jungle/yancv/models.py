@@ -1,4 +1,7 @@
 from django.db import models
+from logging import getLogger
+
+logger = getLogger("yancv")
 
 # import functions for Coursera courses after classes
 
