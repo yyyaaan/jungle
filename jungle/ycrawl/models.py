@@ -57,6 +57,10 @@ class YCrawlConfig(models.Model):
     def get_json_by_name(cls, name):
         return loads(cls.objects.get(pk=name).value)
 
+    @classmethod
+    def get_value(cls, name):
+        return cls.objects.get(pk=name).value
+
     def clean(self):
         """Reject ill-formed json"""
         if ":" in self.value:

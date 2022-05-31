@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_otp',
     'django_otp.plugins.otp_totp',
-    'django_otp.plugins.otp_static',
+    # 'django_otp.plugins.otp_static',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -116,8 +116,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.AdminRenderer',
         'rest_framework.renderers.JSONOpenAPIRenderer'
     ]

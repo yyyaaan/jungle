@@ -15,11 +15,6 @@ from ycrawl.serializers import *
 #            |___/                                                        
 # control id is either 1, 2, 3 or 0 defines a quarter of all tasks
 
-# META is now saved into two major parts "general" an "url"
-def meta_major():
-    META = YCrawlConfig.get_json_by_name("general")
-    return META['bucket'], META['scope'], META['max-retry']
-
 
 def meta_url_configs():
     META = YCrawlConfig.get_json_by_name("url")
@@ -127,9 +122,14 @@ class YCrawlJobs:
         the_date = the_date.strftime("%Y%m%d")
         BatchJobList.objects.filter(jobid__startswith=the_date).delete()
 
-
-    def register_jobs(self):
+    def register_jobs(self, force=False):
         """Called on begining of a batch job, usually once a day"""
+        if VmTrail.objects.filter(vmid=self.tag).count() and not force:
+            return False, "already created; use force=True to re-generate"
+
+        if force: 
+            self.delete_a_day()
+
         hotel_config, qr_config = meta_url_configs()
 
         self.nn = 0
@@ -158,23 +158,19 @@ class YCrawlJobs:
         self.nn = 0
         # bulk write to db
         BatchJobList.objects.bulk_create(urls_hotel + urls_qr)
-
-        # control string must be unique, delete if exists
-        VmTrail.objects.filter(vmid=self.tag).delete()
         VmTrail(
             vmid=self.tag, 
             event="jobs created for today", 
             info=f"register {len(urls_hotel + urls_qr)} batch jobs to DB"
         ).save()
 
-
         return True
 
     def register_completion(self):
         """Scan completed jobs and update DB"""
-        gsbucket, runmode, limit_retry = meta_major()
+        runmode, limit_retry = YCrawlConfig.get_value('scope'), int(YCrawlConfig.get_value('max-retry'))
         dstr = date.today().strftime("%Y%m%d")
-        bucket = storage.Client().get_bucket(gsbucket)
+        bucket = storage.Client().get_bucket(YCrawlConfig.get_value('bucket'))
 
         files_in_storage = [x.name for x in bucket.list_blobs(prefix=f'{runmode}/{date.today().strftime("%Y%m/%d")}')]
         keys_completed = [dstr + "_" + x.split("_")[1] for x in files_in_storage if not x.endswith("ERR.pp")]
@@ -193,43 +189,46 @@ class YCrawlJobs:
         
         return True
 
-    def on_vm_completed(self, min_percentage=0.98):
+    def on_vm_completed(self):
         """when one vm completes, update status, and check all done"""
-        
-        self.register_completion()
 
         control = VmTrail.objects.filter(vmid=self.tag)
         if control.first().event == self.done:
             return True, "all completed and processed alread, don't continue"
+        
+        self.register_completion()
 
-        objs = BatchJobList.get_today_objects()
-        percentage = 1.0 * objs.filter(completion=True).count() / objs.count()
-        if percentage < min_percentage:
+        if (self.checkin(noloop=True)) == (True, self.done):
+            # start dataprocessor
+            dp_vms = VmRegistry.objects.filter(project="yCrawl", role="dataprocessor")
+            vmstartstop([x.vmid for x in dp_vms], "START", "start dataprocessor on all completed")
+            # double check all crawler stop
+            wk_vms = VmRegistry.objects.filter(project="yCrawl", role="crawler")
+            vmstartstop([x.vmid for x in wk_vms], "STOP", "confirm stopped on all completed")
+            # update control item
+            control.update(event=self.done)
+        else:
             return False, "not yet all completed, check next time"
 
-        # reaching here means ready-for-data-processing
-        dp_vms = VmRegistry.objects.filter(project="yCrawl", role="dataprocessor")
 
-        action_serializer = VmActionSerializer(data={
-            "vmids": [x.vmid for x in dp_vms],
-            "event": "START",
-            "info": "all completed and start dataprocessor", 
-        })
-        if action_serializer.is_valid(raise_exception=True):
-            action_serializer.save()
-
-        control.update(event=self.done)
-
-    def checkin(self):
+    def checkin(self, noloop=False):
+        """scheduled call; check for remaining jobs and start, return if all completed by vm"""
         if VmTrail.objects.filter(vmid=self.tag).first().event == self.done:
             return True, "done for today, do nothing"
 
         remaining = (BatchJobList
             .get_today_objects()
-            .filter(completion=True)
+            .filter(completion=False)
             .values('vmid')
-            .annotate(dcount=Count('vmid'))
+            .annotate(todo=Count('vmid'))
         )
-
-        return True, "checkin completed"
+        limit = int(YCrawlConfig.objects.get(pk="retry-threshold").value)
+        vmids = [x["vmid"] for x in remaining if x["todo"] > limit]
+        if len(vmids):
+            vmstartstop(vmids, "START", "checkin")
+            return False, "cralwer continues"
+        else:
+            if not noloop:
+                self.on_vm_completed()
+            return True, self.done
 

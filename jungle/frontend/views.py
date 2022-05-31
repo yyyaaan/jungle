@@ -11,7 +11,7 @@ from json import loads, dumps
 from frontend.models import *
 from frontend.scripts import *
 from ycrawl.vmmanager import vm_list_all
-from ycrawl.serializers import *
+from ycrawl.ycrawlurl import *
 
 
 # helper function (will be called be sitemap)
@@ -119,8 +119,12 @@ def vm_management(request):
 
 def job_overview(request):
 
-    meta = YCrawlConfig.get_json_by_name("general")
-    gsbucket, runmode = meta['bucket'], meta['scope']
+    gsbucket, runmode = YCrawlConfig.get_value("bucket"), YCrawlConfig.get_value("scope")
+    
+    yj = YCrawlJobs()
+    yj.register_jobs() # will auto-skip
+    yj.register_completion()
+
     
     jobs = BatchJobList.get_today_objects()
     n_all, n_todo = jobs.count(), jobs.filter(completion=False).count() 
