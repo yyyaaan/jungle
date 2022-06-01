@@ -5,3 +5,6 @@ curl -d '{"role": "test"}' -H "Content-Type: application/json" -H "Authorization
 
 echo "Checkin"
 curl -H "Authorization: Bearer $token" -X POST $endpoint/joblist/checkin/
+
+echo "Get VM settings"
+curl -H "Content-Type: application/json" -H "Authorization: Bearer $token" -X GET $endpoint/configs/worker/

@@ -16,6 +16,12 @@ python manage.py makemigrations appname
 python manage.py migrate
 python manage.py test appname
 
+# init migrations / drop migrate history
+python manage.py migrate --fake appname zero
+python manage.py makemigrations
+python manage.py migrate --fake-initial
+
+
 # django-extensions https://django-extensions.readthedocs.io/en/latest/command_extensions.html
 python manage.py create_jobs appname
 python ./jungle/manage.py runjobs hourly

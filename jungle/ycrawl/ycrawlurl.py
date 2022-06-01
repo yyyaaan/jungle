@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from google.cloud import storage
 from django.db.models import Count
 
@@ -15,24 +15,30 @@ from ycrawl.serializers import *
 #            |___/                                                        
 # control id is either 1, 2, 3 or 0 defines a quarter of all tasks
 
+def create_url_config_from_json(cfg):
 
-def meta_url_configs():
-    META = YCrawlConfig.get_json_by_name("url")
+    if "fixed-date-min" in cfg: # align to relative date example
+        dmax = datetime.strptime(cfg['fixed-date-max'], "%Y-%m-%d").date() - date.today()
+        dmin = datetime.strptime(cfg['fixed-date-min'], "%Y-%m-%d").date() - date.today()
+        cfg['date-range-max'], cfg['date-range-min'] = dmax.days, dmin.days
+
+    # all groups are divided into 4-day span
     control_id = ((date.today() - date(1970,1,1)).days) % 4
 
     # compute range of check in dates
-    range_width = int((META['date-range-max'] - META['date-range-min']) / 4)
-    date_adjusted_min = META['date-range-min'] - control_id
+    range_width = int((cfg['date-range-max'] - cfg['date-range-min']) / 4)
+    date_adjusted_min = cfg['date-range-min'] - control_id
     range_delta_days = [date_adjusted_min + control_id * range_width + x for x in range(range_width)]
-    hotel_config = META['active-hotel-config']
+    hotel_config = cfg['active-hotel-config']
     hotel_config["checkin-list"] = [date.today() + timedelta(days=x) for x in range_delta_days]
 
     # compute qatar depature days
     interval_7 = range(min(range_delta_days), max(range_delta_days), 7)
-    qr_config = META['active-qr-config']
+    qr_config = cfg['active-qr-config']
     qr_config["dep-date-list"] = [date.today() + timedelta(days=x) for x in interval_7]
 
     return hotel_config, qr_config
+
 
 
 
@@ -42,18 +48,18 @@ def meta_url_configs():
 #  | |_| |  _ <| |___  | |_| |  __/ | | |  __/ | | (_| | || (_) | |   
 #   \___/|_| \_\_____|  \____|\___|_| |_|\___|_|  \__,_|\__\___/|_|   
                                                                     
-def url_qr(from1, to1, from2, to2, departure_date, layover_days):
+def url_qr(from1, to1, from2, to2, departure_date, layover_days, booking_class="B"):
 
-    META = YCrawlConfig.get_json_by_name("url")
-    META_IATA = META['meta-iata']
+    meta_iata = YCrawlConfig.get_json_by_name("meta-iata")
 
     return_date = departure_date + timedelta(days=layover_days)
 
     if from1 == to2 and to1 == from2:
         return f'''
         https://booking.qatarairways.com/nsp/views/showBooking.action?widget=QR
-        &searchType=F&addTaxToFare=Y&minPurTime=0&upsellCallId=&allowRedemption=Y&flexibleDate=Off&bookingClass=B&tripType=R&selLang=en
-        &fromStation={from1}&from={META_IATA[from1]}&toStation={to1}&to={META_IATA[to1]}
+        &searchType=F&addTaxToFare=Y&minPurTime=0&upsellCallId=&allowRedemption=Y&flexibleDate=Off
+        &bookingClass={booking_class}&tripType=R&selLang=en
+        &fromStation={from1}&from={meta_iata[from1]}&toStation={to1}&to={meta_iata[to1]}
         &departingHidden={departure_date.strftime("%d-%b-%Y")}&departing={departure_date.strftime("%Y-%m-%d")}
         &returningHidden={return_date.strftime("%d-%b-%Y")}&returning={return_date.strftime("%Y-%m-%d")}
         &adults=1&children=0&infants=0&teenager=0&ofw=0&promoCode=&stopOver=NA
@@ -61,7 +67,8 @@ def url_qr(from1, to1, from2, to2, departure_date, layover_days):
 
     return f'''
     https://booking.qatarairways.com/nsp/views/showBooking.action?widget=MLC
-    &searchType=S&bookingClass=B&minPurTime=null&tripType=M&allowRedemption=Y&selLang=EN&adults=1&children=0&infants=0&teenager=0&ofw=0&promoCode=
+    &searchType=S&bookingClass={booking_class}
+    &minPurTime=null&tripType=M&allowRedemption=Y&selLang=EN&adults=1&children=0&infants=0&teenager=0&ofw=0&promoCode=
     &fromStation={from1}&toStation={to1}&departingHiddenMC={departure_date.strftime("%d-%b-%Y")}&departing={departure_date.strftime("%Y-%m-%d")}
     &fromStation={from2}&toStation={to2}&departingHiddenMC={return_date.strftime("%d-%b-%Y")}&departing={return_date.strftime("%Y-%m-%d")}
     '''.replace("\n", "").replace("\r", "").replace(" ", "")
@@ -69,14 +76,14 @@ def url_qr(from1, to1, from2, to2, departure_date, layover_days):
 
 def url_hotel(checkin, nights, hotel):
 
-    META = YCrawlConfig.get_json_by_name("url")
-    META_URL = META['meta-url']
+
+    meta_hotel = YCrawlConfig.get_json_by_name("meta-hotel")
 
     # find hotel code
-    if hotel.lower() in META_URL.keys():
-        code = META_URL[hotel.lower()]
+    if hotel.lower() in meta_hotel.keys():
+        code = meta_hotel[hotel.lower()]
     else:
-        print(META_URL.keys)
+        logger.error(f"hotel <{hotel}> not found in {meta_hotel.keys()}")
         return "ERROR"
 
     checkout = checkin + timedelta(days=nights)
@@ -108,11 +115,11 @@ class YCrawlJobs:
         self.tag = "JobControl" + date.today().strftime("%Y%m%d")
         self.done = "All Done"
     
-    def assign_seq(self, identifier): # internal use
+    def _assign_seq(self, identifier): # internal use
         self.nn += 1
         return f"{date.today().strftime('%Y%m%d')}_{identifier}{self.nn:04}"
 
-    def assign_vm(self): # internal use
+    def _assign_vm(self): # internal use
         batchnum = self.nn % self.vms.count()
         return self.vms.filter(batchnum=batchnum).first()
 
@@ -124,40 +131,47 @@ class YCrawlJobs:
 
     def register_jobs(self, force=False):
         """Called on begining of a batch job, usually once a day"""
-        if VmTrail.objects.filter(vmid=self.tag).count() and not force:
-            return False, "already created; use force=True to re-generate"
+        if VmTrail.objects.filter(vmid=self.tag).count():
+            if force: 
+                self.delete_a_day()
+            else:
+                return False, "already created; use force=True to re-generate"
 
-        if force: 
-            self.delete_a_day()
+        # clear records older than 3 days to limit db size
+        self.delete_a_day(3)
 
-        hotel_config, qr_config = meta_url_configs()
 
-        self.nn = 0
-        urls_hotel = [BatchJobList(
-                jobid = self.assign_seq("H"),
-                vmid = self.assign_vm(),
-                weburl = url_hotel(the_date, int(the_n_h.split(",")[0]), the_n_h.split(",")[1])
-            )
-            for the_date in hotel_config["checkin-list"]
-            for the_n_h in hotel_config["hotel-nights"]
-        ]
+        for cfg in YCrawlConfig.get_json_by_name("job-groups")["groups"]:
 
-        self.nn = 0
-        urls_qr = [BatchJobList(
-                jobid = self.assign_seq("Q"),
-                vmid = self.assign_vm(),
-                weburl = url_qr(a, b, c, d, x, qr_config["center-days"])
-            )
-            for a in qr_config["origins"].split(",")
-            for b in qr_config["destinations"].split(",")
-            for c in qr_config["destinations"].split(",")
-            for d in qr_config["origins"].split(",")
-            for x in qr_config["dep-date-list"]
-        ]
+            hotel_config, qr_config = create_url_config_from_json(cfg)
 
-        self.nn = 0
-        # bulk write to db
-        BatchJobList.objects.bulk_create(urls_hotel + urls_qr)
+            self.nn = 0
+            urls_hotel = [BatchJobList(
+                    jobid = self._assign_seq("H" + cfg["code"]),
+                    vmid = self._assign_vm(),
+                    weburl = url_hotel(the_date, int(the_n_h.split(",")[0]), the_n_h.split(",")[1])
+                )
+                for the_date in hotel_config["checkin-list"]
+                for the_n_h in hotel_config["hotel-nights"]
+            ]
+
+            self.nn = 0
+            urls_qr = [BatchJobList(
+                    jobid = self._assign_seq("Q" + cfg["code"]),
+                    vmid = self._assign_vm(),
+                    weburl = url_qr(a, b, c, d, x, qr_config["center-days"], z)
+                )
+                for a in qr_config["origins"].split(",")
+                for b in qr_config["destinations"].split(",")
+                for c in qr_config["destinations"].split(",")
+                for d in qr_config["origins"].split(",")
+                for x in qr_config["dep-date-list"]
+                for z in qr_config["booking-class"].split(",")
+            ]
+
+            BatchJobList.objects.bulk_create(urls_hotel + urls_qr)
+
+
         VmTrail(
             vmid=self.tag, 
             event="jobs created for today", 

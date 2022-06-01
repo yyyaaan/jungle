@@ -99,3 +99,9 @@ class YCrawlConfigViewSet(viewsets.ModelViewSet):
     queryset = YCrawlConfig.objects.all().order_by("name")
     serializer_class = YCrawlConfigSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(methods=['GET'], detail=False)
+    def worker(self, request, **kwargs):  
+        """shortcut for workers to get setting"""      
+        worker_settings = YCrawlConfig.get_json_by_name("worker-profile")
+        return Response(worker_settings, status=status.HTTP_200_OK)

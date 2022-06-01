@@ -135,10 +135,17 @@ h1 {
 
 {% block contentmore %} 
 
-<div class="col m3 s12">
+<div class="col m3 s12 col-hover">
   {% if extra %}
     <p class="right-align"> {{extra}}</p>
     <p class='right-align'><a id="log-btn" class="btn-flat" onclick="showLog()">runtime log</a></p>
+  {% endif %}
+
+  {% if allurls %}
+  <div class="right-align">
+    <p>All Django URLs (/ added to link):</p>
+    {% for x in allurls %}<a href="/{{x}}">{{x}}</a><br />{% endfor %}
+  </div>
   {% endif %}
 </div>
 
@@ -174,10 +181,11 @@ h1 {
   </p>
   {% endfor %}
 
-  {% if allurls %}
-    <p>All Django URLs (/ added to link):</p>
-    {% for x in allurls %}<a href="/{{x}}">{{x}}</a><br />{% endfor %}
+  {% if ypoints %}
+  <p>yCrawl endpoints:</p>
+  {% for x in ypoints %}<a href="{{x.cleanurl}}">{{x.cleanurl}}</a><br />{% endfor %}
   {% endif %}
+
 </div>
 
 <div id="log-print" class="col container" style="display: none; margin:9%;">

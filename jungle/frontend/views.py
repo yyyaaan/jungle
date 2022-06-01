@@ -79,6 +79,7 @@ def get_urls(request):
     pagedata["extra"] = f"{SiteUrl.objects.all().count() - prev_cnt} new url."
     pagedata["allurls"] = all_urls # when rendering, prefix a backslash!!!
     pagedata["notlisted"] = SiteUrl.objects.filter(menu1__gt=10000, menu2__gt=10000, menu3__gt=10000).exclude(menu1=1000000)
+    pagedata["ypoints"] = SiteUrl.objects.filter(cleanurl__icontains="ycrawl")
     # read logs
     pagedata["log"] = open(f"{str(settings.BASE_DIR)}/jungle.log", "r").read()
 
@@ -121,9 +122,12 @@ def job_overview(request):
 
     gsbucket, runmode = YCrawlConfig.get_value("bucket"), YCrawlConfig.get_value("scope")
     
-    yj = YCrawlJobs()
-    yj.register_jobs() # will auto-skip
-    yj.register_completion()
+    try:
+        yj = YCrawlJobs()
+        yj.register_jobs() # will auto-skip
+        yj.register_completion()
+    except Exception as ex:
+        logger.warn("From overview:", str(ex))
 
     
     jobs = BatchJobList.get_today_objects()

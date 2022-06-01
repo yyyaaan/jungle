@@ -4,6 +4,7 @@ from .models import *
 
 class YCrawlConfigAdmin(admin.ModelAdmin):
     list_display = ("name", "value")
+    ordering = ["name"]
 
 
 class VmRegistryAdmin(admin.ModelAdmin):

@@ -9,7 +9,7 @@ from .models import *
 URL_VMS = "/ycrawl/vms/"
 URL_TRAILS = "/ycrawl/trails/"
 URL_ACTIONS = "/ycrawl/actions/"
-URL_START = "/ycrawl/START/"
+URL_START = "/ycrawl/joblist/start/"
 
 class NoTokenAccessTests(TestCase):
     """No token, no auth'd user cases"""
@@ -50,7 +50,6 @@ class BearerAccessTests(TestCase):
         self.user = User.objects.create_user(email='unittest@yan.fi', password='unittestpassword', username='Unit Tester')
         self.vmdata = {"vmid":"testvm", "project":"a", "role": "a", "provider": "a", "zone": "a", "batchnum": 999}
         self.client = APIClient()
-        # self.client.force_authenticate(user=self.user)
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + Token.objects.create(user=self.user).key
         )
