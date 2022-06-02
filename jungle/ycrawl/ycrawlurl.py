@@ -4,6 +4,8 @@ from django.db.models import Count
 
 
 from ycrawl.serializers import *
+from ycrawldataprocessor.YCrawlDataProcessor import YCrawlDataProcessor
+
 
 
 
@@ -213,9 +215,23 @@ class YCrawlJobs:
         self.register_completion()
 
         if (self.checkin(noloop=True)) == (True, self.done):
-            # start dataprocessor
-            dp_vms = VmRegistry.objects.filter(project="yCrawl", role="dataprocessor")
-            vmstartstop([x.vmid for x in dp_vms], "START", "start dataprocessor on all completed")
+            # start dataprocessor, now locally
+            # dp_vms = VmRegistry.objects.filter(project="yCrawl", role="dataprocessor")
+            # vmstartstop([x.vmid for x in dp_vms], "START", "start dataprocessor on all completed")
+            logger.log("All completed for today, starting data process (see Trail)")
+            VmTrail(vmid="DataProcessor", event="start locally", info="Data Processor started here").save()
+
+            ydp = YCrawlDataProcessor(
+                scope=YCrawlConfig.get_value("scope"),
+                exchange=YCrawlConfig.get_json_by_name("xchange-rates"),
+                bucket_name=YCrawlConfig.get_value("bucket"),
+                archive_name=YCrawlConfig.get_value("bucket-archive"),
+                output_name=YCrawlConfig.get_value("bucket-output"),
+                msg_endpoint=YCrawlConfig.get_value("endpoint-msg"),
+            )
+            ydp.start_batch_processing()
+            ydp.finalize_and_summarize()
+            
             # double check all crawler stop
             wk_vms = VmRegistry.objects.filter(project="yCrawl", role="crawler")
             vmstartstop([x.vmid for x in wk_vms], "STOP", "confirm stopped on all completed")

@@ -6,32 +6,34 @@ from google.cloud import storage
 
 from .Cooker import *
 
-# save big str shoulld be added, excpetion no print
-
 class FileProcessor(Thread):
-    def __init__(self, filelist, gsbucket_name, tag):
+    def __init__(self, filelist, tag, bucket_name, archive_name):
         Thread.__init__(self)
         self.filelist = filelist
         self.tag = tag
-        # allocate a dedicated gsclient for speed
-        self.gsbucket = storage.Client(project="yyyaaannn").get_bucket(gsbucket_name)
+        self.BIG_STR = ""
+
+        # allocate a dedicated gsclient for speed, achive bucket later
+        self._gsbucket = storage.Client(project="yyyaaannn").get_bucket(bucket_name)
+        self.archive_name = archive_name     
+
 
     def run(self):
-        list_errs, list_flights, list_hotels, files_exception = [],[],[],[]
+        list_errs, list_flights, list_hotels = [],[],[]
 
         for one_filename in self.filelist:
             try:
-                one_str = self.gsbucket.get_blob(one_filename).download_as_string()
-                # save_big_str(one_str)
+                one_str = self._gsbucket.get_blob(one_filename).download_as_string()
+                self.BIG_STR += "<!--NEW FILE--->" + str(one_str)
                 one_soup = BeautifulSoup(one_str, 'html.parser')
                 if "_ERR" in one_filename:
                     list_errs += cook_error(one_soup)
                     continue
             except Exception as e:
-                print(e)
-                files_exception.append({
+                list_errs.append({
                     "filename": one_filename, 
                     "errm": str(e),
+                    "type": "Exception",
                     "ts": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
                 })
                 continue
@@ -51,17 +53,18 @@ class FileProcessor(Thread):
                 else:
                     raise Exception(f"\nVendor not found {vendor}")
             except Exception as e:
-                print(e)
                 if one_soup.vmid is None or one_soup.qurl is None or one_soup.timestamp is None:
                     print(f"Exceptionally missing vmid/qurl/timestamp {one_filename}")
-                files_exception.append({
+                list_errs.append({
                     "filename": one_filename, 
                     "vmid": one_soup.vmid.string if one_soup.vmid is not None else "missing VMID",
                     "uurl": ".".join(one_soup.qurl.string.split(".")[1:]) if one_soup.qurl is not None else "",
                     "errm": str(e),
+                    "type": "Exception",
                     "ts": one_soup.timestamp.string if one_soup.vmid is not None else ""
                 })
         # endfor
+
         # create dataframe according to data
         hotels_by_room, hotels_by_rate, hotels_failed = [], [], []
         for x in list_hotels:
@@ -75,9 +78,15 @@ class FileProcessor(Thread):
         df_hotels_1 = DataFrame(hotels_by_rate).explode(["rate_type", "rate_sum", "rate_avg"]) if len(hotels_by_rate) else None
         df_hotels_2 = DataFrame(hotels_by_room).explode(["room_type", "rate_sum", "rate_avg"]) if len(hotels_by_room) else None
 
-
+        # save to cache & archive
         DataFrame(list_errs).to_parquet(f"e{self.tag}.gzip", compression='gzip')
         DataFrame(list_flights).to_parquet(f"f{self.tag}.gzip", compression='gzip')
         concat([df_hotels_1, df_hotels_2]).to_parquet(f"h{self.tag}.gzip", compression='gzip')
+        
+        storage.Client(project="yyyaaannn") \
+            .get_bucket(self.archive_name) \
+            .blob(f"BIGSTR/{datetime.now().strftime('%Y%m/%Y')}{self.tag}.txt") \
+            .upload_from_string(self.BIG_STR)
 
         return True
+

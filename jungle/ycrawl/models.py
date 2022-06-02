@@ -63,7 +63,7 @@ class YCrawlConfig(models.Model):
 
     def clean(self):
         """Reject ill-formed json"""
-        if ":" in self.value:
+        if ":" in self.value and "{" in self.value:
             try:
                 loads(self.value)
             except Exception as e:
