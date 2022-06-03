@@ -154,7 +154,25 @@ def job_overview(request):
 
 @login_required(login_url='/admin/login/')
 def job_overview_log(request):
-    return render(request, "frontend/overviewlog.html", {"logs_by_vm": get_simple_log()})
+    trail = VmTrail.objects.filter(timestamp__date=date.today())
+    action = VmActionLog.objects.filter(timestamp__date=date.today())
+    
+    vms = set([x.vmid for x in trail])
+    results = []
+    for one in sorted(vms):
+        if one[:10].upper() in "SELF JOBCONTROL":
+            continue
+        results.append({
+            "name": one,
+            "logs": "<br/>".join([
+                f"{x.timestamp.strftime('%H:%M:%S')} [{x.event}] {x.info}" 
+                for x in trail if x.vmid == one
+            ])
+        })
+
+    # results = get_simple_log()
+    return render(request, "frontend/overviewlog.html", {"logs_by_vm": results})
+
 
 
 def job_overview_vmplot(request):

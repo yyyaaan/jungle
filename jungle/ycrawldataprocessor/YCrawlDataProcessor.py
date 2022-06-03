@@ -1,4 +1,5 @@
 from os import listdir, remove
+from os.path import exists
 from bs4 import BeautifulSoup
 from random import shuffle, choices
 from pandas import DataFrame, concat, read_parquet, to_datetime, isna
@@ -12,7 +13,6 @@ from .FileProcessor import FileProcessor
 """
 Know issues:
 - file not copied meta all completed not saved
-- cooker float parsing 1234.123456.12
 """
 
 class YCrawlDataProcessor():
@@ -122,7 +122,13 @@ class YCrawlDataProcessor():
 
 
     def _finalize_df_errs(self):
-        dfs = concat([read_parquet("e" + x) for x in self.cached_list])
+        flists = []
+        for x in self.cached_list:
+            try:
+                flists.append(read_parquet("/home/yan/jungle/jungle/e" + x))
+            except Exception as e:
+                print(str(e))
+        dfs = concat(flists)
 
         if self._upload_flag:
             self._x_upload_to_bq(df, "issues")
@@ -130,8 +136,14 @@ class YCrawlDataProcessor():
 
 
     def _finalize_df_flights(self):
-        df_flights = concat([read_parquet("f" + x) for x in self.cached_list])
-
+        flists = []
+        for x in self.cached_list:
+            try:
+                flists.append(read_parquet("/home/yan/jungle/jungle/f" + x))
+            except Exception as e:
+                print(str(e))
+        df_flights = concat(flists)
+        
         df_flights_out = (df_flights
             .groupby(["route", "ddate", "rdate"])
             .agg(ts=("ts", max))
@@ -153,8 +165,14 @@ class YCrawlDataProcessor():
 
 
     def _finalize_df_hotels(self):
-        df_hotels = concat([read_parquet("h" + x) for x in self.cached_list])
-
+        flists = []
+        for x in self.cached_list:
+            try:
+                flists.append(read_parquet("/home/yan/jungle/jungle/h" + x))
+            except Exception as e:
+                print(str(e))
+        df_hotels = concat(flists)
+        
         main_keys = ["hotel", "room_type", "rate_type", "check_in", "check_out"]
         df_hotels_out = (df_hotels
             .groupby(main_keys)

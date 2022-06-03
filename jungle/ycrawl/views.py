@@ -40,19 +40,20 @@ class BatchJobListViewSet(viewsets.ReadOnlyModelViewSet):
         if not vmid:
             return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
         
+        YCrawlJobs().register_completion()
         records = BatchJobList.get_today_objects().filter(vmid=vmid, completion=False)
         output = "\n".join([x.nodejob for x in records])
-        VmTrail(vmid=vmid, event="GET joblist/nodejobs", info=f"{records.count()} returned").save()
+        VmTrail(vmid="self", event="nodejobs", info=f"{records.count()} returned").save()
         return render(request, "ycrawl/raw.html", {"output": output})
 
     @action(methods=['POST'], detail=False)
     def start(self, request, **kwargs):
-        """Plain results for nodejs worker, vmid mandatory"""
+        """start the daily job"""
         vmrole = request.data['role'] if 'role' in request.data else "crawler"
         vms = VmRegistry.objects.filter(role=vmrole)
 
         if len(vms):
-            YCrawlJobs().register_jobs()
+            YCrawlJobs().register_jobs(force=('force' in request.data))
             event = "STOP" if 'stop' in request.data else "START"
             vmstartstop([x.vmid for x in vms], event, "Initated by API start-ycrawl")
         else:
@@ -74,8 +75,9 @@ class VmActionLogViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST'], detail=False)
     def notifydone(self, request, *args, **kwargs):
-        """Plain results for nodejs worker, vmid mandatory"""
-        vmstartstop([request.data["VMID"]], "STOP", "notifydone endpoint")        
+        """shortcut for crawler, vmid mandatory; a-no-shut-flag to override STOP action"""
+        if YCrawlConfig.get_value("a-no-shutdown-flag") != date.today().strftime("%Y-%m-%d"):
+            vmstartstop([request.data["vmid"]], "STOP", "notifydone endpoint")        
         YCrawlJobs().on_vm_completed()
         return Response(status=status.HTTP_201_CREATED)
 

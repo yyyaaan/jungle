@@ -54,7 +54,7 @@ def send_df_as_flex(df, cols=['title', 'content'], text="info", color="RANDOM", 
         try:
             res = post(
                 msg_endpoint,
-                headers={"Authorization": f"Bearer {getenv('tokendata')}"},
+                headers={"Authorization": f"Bearer {getenv('tttoken')}"},
                 json = {"to": reciever, "text": text, "flex": flex_json}
             )
             # print(f"{res.status_code} {res.text}")                

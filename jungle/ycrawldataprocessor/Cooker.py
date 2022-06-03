@@ -5,9 +5,24 @@ import re
 # supporting lambdas, note for use of comma and dot
 extract_float = lambda x: float(re.sub(r"[^\d]+", "", x)) 
 get_float = lambda x: float(re.sub(r"[^\d\.]+", "", x.replace(",", ".")))
-parse_floats = lambda x: [get_float(xx.get_text()) for xx in x]
 parse_ccy = lambda x: "EUR" if "€" in x[0].get_text() else "USD"
 parse_texts = lambda x: [xi.get_text(strip=True) for xi in x]
+parse_floats = lambda x: [get_float(xx.get_text()) for xx in x]
+
+def parse_floats_2(x):
+    outlist = []
+    for one in x:
+        value = x.get_float()
+        value = "3400,5486431,12"
+        value = value.replace(",", ".")
+        out = re.search(r"\d+.\d{2}", value).group(0)
+        outlist.append(out)
+    return outlist
+
+
+
+# pattern = '<title>(.*)</title>'
+# text = '<title>hello</title>'
 
 
 ###############################################################################################
@@ -64,10 +79,10 @@ def cook_accor(soup):
         "rate_type": [x.select_one("span").get_text(strip=True) for x in room.select(".offer__options")],
         #"rate_sum_pre": parse_floats(room.select(".offer__price")),
         #"rate_sum_tax": parse_floats(room.select(".pricing-details__taxes")),
-        "rate_avg": [calc_sum(a,b)/nights for a,b in zip(parse_floats(room.select(".offer__price")), 
-                                        parse_floats(room.select(".pricing-details__taxes")))],
-        "rate_sum": [calc_sum(a,b) for a,b in zip(parse_floats(room.select(".offer__price")), 
-                                        parse_floats(room.select(".pricing-details__taxes")))],
+        "rate_avg": [calc_sum(a,b)/nights for a,b in zip(parse_floats_2(room.select(".offer__price")), 
+                                        parse_floats_2(room.select(".pricing-details__taxes")))],
+        "rate_sum": [calc_sum(a,b) for a,b in zip(parse_floats_2(room.select(".offer__price")), 
+                                        parse_floats_2(room.select(".pricing-details__taxes")))],
         "ccy": parse_ccy(room.select(".offer__price")),
         "check_in": cico[0],
         "check_out": cico[1],
