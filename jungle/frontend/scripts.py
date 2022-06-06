@@ -21,17 +21,16 @@ def storage_file_viewer(gsbucket, runmode, job_object):
     
     bucket = storage.Client().get_bucket(gsbucket)
     all_files = [x.name for x in bucket.list_blobs(prefix=f'{runmode}/{datetime.now().strftime("%Y%m/%d")}')]
-    info_str = "All scheduled tasks done." if len([x for x in all_files if "meta_on_completion" in x]) else "In progress..."
     
+
     main_list = [{
         "key": x.jobid.split("_")[1],
         "server": x.vmid.vmid,
         "brand": x.weburl.split(".")[1].upper(),
-        "desc": ("" if x.note[:1] == "X" else "OK") + x.note.replace("X", ""),
+        "desc": ("OK" if x.note[:1] != "X" and x.completion else "") + x.note.replace("X", ""),
         "link": [f'https://storage.cloud.google.com/{gsbucket}/{xx}' for xx in all_files if x.jobid in xx],
         "uurl": x.weburl
     } for x in job_object]
-
 
     unique_brands = set([x['brand'] for x in main_list])
 
@@ -45,39 +44,7 @@ def storage_file_viewer(gsbucket, runmode, job_object):
         x["len"] = f"{len([y for y in x['list'] if 'OK' in y['desc']])} of {len(x['list'])}"
         x["list"].sort(key=lambda x: x["desc"] + x["key"])
 
-    return output_list, info_str
-
-
-def get_simple_log():
-
-    log_client = gcplogging.Client()
-
-    TODAY0 = f"{date.today().strftime('%Y-%m-%d')}T00:00:00.123456Z"
-
-    the_filter = f'logName="projects/yyyaaannn/logs/stdout" AND timestamp>="{TODAY0}"'
-    log_entries = log_client.list_entries(filter_=the_filter, order_by=gcplogging.DESCENDING)
-    logs_stdout = [f'{x.timestamp.strftime("%H:%M:%S")} {x.payload}' for x in log_entries]
-    logs_stdout = [x for x in logs_stdout if "!DOCTYPE html" not in x]
-
-    ### logs orginized by server
-    the_filter = f'logName="projects/yyyaaannn/logs/y_simple_log" AND timestamp>="{TODAY0}"'
-    log_entries = log_client.list_entries(filter_=the_filter, order_by=gcplogging.DESCENDING)
-    log_simplified = [f'{x.timestamp.strftime("%H:%M:%S")}{x.payload}' for x in log_entries if not str(x.payload).startswith("test")]
-    log_simplified = [x for x in log_simplified if "!DOCTYPE html" not in x]
-
-    logs_by_vm = [{"name": "App-Engine", "logs": "<br/>".join(logs_stdout)}]
-    for the_vm in [x.vmid for x in VmRegistry.objects.filter(project="yCrawl", role="crawler")]:
-        the_log_entries = [x.replace(the_vm, "") for x in log_simplified + logs_stdout if the_vm in x and "VM Manager" not in x]
-        the_log = {
-            "name": the_vm.upper().replace("YCRAWL-", ""),
-            "logs": "<br/>".join(sorted(the_log_entries, reverse=True)),
-        }
-        logs_by_vm.append(the_log)
-
-    
-
-    return  logs_by_vm
-
+    return output_list
 
 
 

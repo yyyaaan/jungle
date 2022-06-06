@@ -1,8 +1,8 @@
-from datetime import date, datetime, timedelta
+from time import sleep
 from threading import Thread
+from datetime import date, datetime, timedelta
 from google.cloud import storage
 from django.db.models import Count
-
 
 from ycrawl.serializers import *
 from ycrawldataprocessor.YCrawlDataProcessor import YCrawlDataProcessor
@@ -181,7 +181,7 @@ class YCrawlJobs:
 
         return True
 
-    def register_completion(self):
+    def register_completion(self, deletion_detection=False):
         """Scan completed jobs and update DB"""
         runmode, limit_retry = YCrawlConfig.get_value('scope'), int(YCrawlConfig.get_value('max-retry'))
         dstr = date.today().strftime("%Y%m%d")
@@ -192,7 +192,8 @@ class YCrawlJobs:
         keys_error = [dstr + "_" + x.split("_")[1] for x in files_in_storage if x.endswith("ERR.pp")]
 
         # update db, add a trail; first reset today (to enable file deletion detection)
-        BatchJobList.get_today_objects().update(completion=False)
+        if deletion_detection:
+            BatchJobList.get_today_objects().update(completion=False, note="")
         objs = BatchJobList.objects
         objs.filter(jobid__in=keys_completed).update(completion=True)
         for x in set(keys_error):
@@ -219,7 +220,15 @@ class YCrawlJobs:
             logger.info("All completed for today, starting data process (see Trail)")
             VmTrail(vmid="DataProcessor", event="start locally", info="Data Processor started here").save()
             
-            # status logged before completion to avoid double calling
+            # avoid double calling
+            if VmTrail.objects.filter(vmid=self.tag).first().event == self.done:
+                logger.warn("Data processor already started but called again 1???")
+                return False, "data processor already started"
+            sleep(3)
+            if VmTrail.objects.filter(vmid=self.tag).first().event == self.done:
+                logger.warn("Data processor already started but called again 2???")
+                return False, "data processor already started"
+
             VmTrail.objects.filter(vmid=self.tag).update(event=self.done)
             thread = Thread(target=run_data_processor)
             thread.start()
@@ -232,8 +241,16 @@ class YCrawlJobs:
     def checkin(self, noloop=False):
         """scheduled call; check for remaining jobs and start, return if all completed by vm"""
         if VmTrail.objects.filter(vmid=self.tag).first().event == self.done:
-            return True, "done for today, do nothing"
+            return None, "done for today, do nothing"
 
+        # skip this checkin if just get notifydone
+        lastdone = VmActionLog.objects.filter(info__icontains="notifydone").latest().timestamp
+        
+        if (datetime.now().astimezone() - lastdone).seconds < 180:
+            VmTrail(vmid="self", event="skipped checkin", info="less than 3 minutes from last notifydone").save()
+            return None, "skipped checkin"
+            
+        self.register_completion()
         remaining = (BatchJobList
             .get_today_objects()
             .filter(completion=False)
@@ -242,9 +259,11 @@ class YCrawlJobs:
         )
         limit = int(YCrawlConfig.objects.get(pk="retry-threshold").value)
         vmids = [x["vmid"] for x in remaining if x["todo"] > limit]
+        infos = [f"{x['vmid'][7:]}-{x['todo']}" for x in remaining]
+
 
         if len(vmids):
-            vmstartstop(vmids, "START", "checkin")
+            vmstartstop(vmids, "START", f"checkin {', '.join(infos)}")
             return False, "cralwer continues"
         else:
             if not noloop:
@@ -275,13 +294,14 @@ class YCrawlJobs:
 
 
 
-def run_data_processor():
+def run_data_processor(offset_day=0):
     # dp_vms = VmRegistry.objects.filter(project="yCrawl", role="dataprocessor")
     # vmstartstop([x.vmid for x in dp_vms], "START", "start dataprocessor on all completed")
     
     # double check all crawler stop
-    wk_vms = VmRegistry.objects.filter(project="yCrawl", role="crawler")
-    vmstartstop([x.vmid for x in wk_vms], "STOP", "confirm stopped on all completed")
+    if offset_day == 0:
+        wk_vms = VmRegistry.objects.filter(project="yCrawl", role="crawler")
+        vmstartstop([x.vmid for x in wk_vms], "STOP", "confirm stopped on all completed")
 
     # call dataprocessor module
     ydp = YCrawlDataProcessor(
@@ -291,6 +311,8 @@ def run_data_processor():
         archive_name=YCrawlConfig.get_value("bucket-archive"),
         output_name=YCrawlConfig.get_value("bucket-output"),
         msg_endpoint=YCrawlConfig.get_value("endpoint-msg"),
+        ref_date=datetime.now() - timedelta(days=abs(int(offset_day))),
+
     )
     ydp.start_batch_processing()
     ydp.finalize_and_summarize()

@@ -1,9 +1,9 @@
 explore/
 staticfiles
 /jungle/media/vision/
-/jungle/media/webreadercache/
+/jungle/media/cache/
 /media/vision/
-/media/webreadercache/
+/media/cache/
 opencv_model/
 zzz*
 clouds.yaml

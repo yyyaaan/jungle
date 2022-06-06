@@ -12,11 +12,10 @@ parse_floats = lambda x: [get_float(xx.get_text()) for xx in x]
 def parse_floats_2(x):
     outlist = []
     for one in x:
-        value = x.get_float()
-        value = "3400,5486431,12"
+        value = x.get_text()
         value = value.replace(",", ".")
         out = re.search(r"\d+.\d{2}", value).group(0)
-        outlist.append(out)
+        outlist.append(float(out))
     return outlist
 
 

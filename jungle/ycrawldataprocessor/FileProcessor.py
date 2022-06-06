@@ -1,17 +1,17 @@
 from bs4 import BeautifulSoup
 from threading import Thread
-from datetime import datetime
 from pandas import DataFrame, concat
 from google.cloud import storage
 
 from .Cooker import *
 
 class FileProcessor(Thread):
-    def __init__(self, filelist, tag, bucket_name, archive_name):
+    def __init__(self, filelist, tag, bucket_name, archive_name, ref_date):
         Thread.__init__(self)
         self.filelist = filelist
         self.tag = tag
         self.BIG_STR = ""
+        self.ref_date = ref_date
 
         # allocate a dedicated gsclient for speed, achive bucket later
         self._gsbucket = storage.Client(project="yyyaaannn").get_bucket(bucket_name)
@@ -34,7 +34,7 @@ class FileProcessor(Thread):
                     "filename": one_filename, 
                     "errm": str(e),
                     "type": "Exception",
-                    "ts": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+                    "ts": self.ref_date.strftime("%Y-%m-%d") + "T00:00:01.000Z"
                 })
                 continue
 
@@ -79,13 +79,13 @@ class FileProcessor(Thread):
         df_hotels_2 = DataFrame(hotels_by_room).explode(["room_type", "rate_sum", "rate_avg"]) if len(hotels_by_room) else None
 
         # save to cache & archive
-        DataFrame(list_errs).to_parquet(f"e{self.tag}.gzip", compression='gzip')
-        DataFrame(list_flights).to_parquet(f"f{self.tag}.gzip", compression='gzip')
-        concat([df_hotels_1, df_hotels_2]).to_parquet(f"h{self.tag}.gzip", compression='gzip')
+        DataFrame(list_errs).to_parquet(f"{self.tag}_e.gzip", compression='gzip')
+        DataFrame(list_flights).to_parquet(f"{self.tag}_f.gzip", compression='gzip')
+        concat([df_hotels_1, df_hotels_2]).to_parquet(f"{self.tag}_h.gzip", compression='gzip')
         
         storage.Client(project="yyyaaannn") \
             .get_bucket(self.archive_name) \
-            .blob(f"BIGSTR/{datetime.now().strftime('%Y%m/%Y')}{self.tag}.txt") \
+            .blob(f"BIGSTR/{self.ref_date.strftime('%Y%m/%Y')}{self.tag}.txt") \
             .upload_from_string(self.BIG_STR)
 
         return True

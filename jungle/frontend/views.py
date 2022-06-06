@@ -12,6 +12,7 @@ from frontend.models import *
 from frontend.scripts import *
 from ycrawl.vmmanager import vm_list_all
 from ycrawl.ycrawlurl import *
+from jungle.settings import BASE_DIR
 
 
 # helper function (will be called be sitemap)
@@ -23,10 +24,10 @@ def make_sidenav():
         "dropgrp2": links.filter(menu2__gt=100).order_by("menu2"),
     }
 
-    t = open(f"{str(settings.BASE_DIR)}/templates/sidenavtemplate.html", "r").read()
+    t = open(f"{str(BASE_DIR)}/templates/sidenavtemplate.html", "r").read()
     t = Template(t)
     x = t.render(Context(menudata))
-    open(f"{str(settings.BASE_DIR)}/templates/sidenav.html", "w").write(x)
+    open(f"{str(BASE_DIR)}/templates/sidenav.html", "w").write(x)
     
     return True
 
@@ -121,14 +122,7 @@ def vm_management(request):
 def job_overview(request):
 
     gsbucket, runmode = YCrawlConfig.get_value("bucket"), YCrawlConfig.get_value("scope")
-    
-    try:
-        yj = YCrawlJobs()
-        yj.register_jobs() # will auto-skip
-        yj.register_completion()
-    except Exception as ex:
-        logger.warn("From overview:", str(ex))
-
+    # no longer update completion status from gs; expect updated already.
     
     jobs = BatchJobList.get_today_objects()
     n_all, n_todo = jobs.count(), jobs.filter(completion=False).count() 
@@ -136,15 +130,12 @@ def job_overview(request):
     n_error = jobs.filter(note__endswith="E").exclude(note__startswith="X").count()
     n_ok = jobs.filter(completion=True).exclude(note__startswith="X").count()
 
-    all_files, info_str = storage_file_viewer(gsbucket, runmode, jobs)
-
     pagedata=dict(
         completed_percent = f"{(1-n_todo/n_all):.2%}",
         n_jobs = f"{n_all-n_todo}/{n_all}",
         jobs_detail = f"{n_ok} completed ok<br/>{n_error}+{n_forfeit} issues",
-        jobs_str = "there is nothing in this version",
-        info_str = f"  {info_str}",
-        all_files = all_files,
+        jobs_detail2 = f"~{n_ok/(n_all-n_todo):.0%} success rate since last checkin.",
+        all_files = storage_file_viewer(gsbucket, runmode, jobs),
         gss_link = f"https://console.cloud.google.com/storage/browser/{gsbucket}/{runmode}/{datetime.now().strftime('%Y%m/%d')}",
         gso_link = f"https://console.cloud.google.com/storage/browser/yyyaaannn-us/yCrawl_Output/{datetime.now().strftime('%Y%m')}",
     )
@@ -154,23 +145,30 @@ def job_overview(request):
 
 @login_required(login_url='/admin/login/')
 def job_overview_log(request):
-    trail = VmTrail.objects.filter(timestamp__date=date.today())
-    action = VmActionLog.objects.filter(timestamp__date=date.today())
-    
+    trail = VmTrail.objects.filter(timestamp__date=date.today()).order_by("-timestamp")
+    action = VmActionLog.objects.filter(timestamp__date=date.today()).order_by("-timestamp")
+
     vms = set([x.vmid for x in trail])
     results = []
     for one in sorted(vms):
-        if one[:10].upper() in "SELF JOBCONTROL":
+        if one[:10].upper() in "SELF JOBCONTROL LOCAL-TEST DATAPROCESSOR":
             continue
         results.append({
-            "name": one,
+            "name": one.replace("ycrawl-", ""),
             "logs": "<br/>".join([
                 f"{x.timestamp.strftime('%H:%M:%S')} [{x.event}] {x.info}" 
                 for x in trail if x.vmid == one
             ])
         })
 
-    # results = get_simple_log()
+    logs = open(f"{str(BASE_DIR)}/jungle.log", "r").read().split("\n")
+    results.append({
+        "name": "Key-LOG",
+        "logs": "<br/>".join([x.split("|")[0] for x in logs if date.today().strftime("%Y-%m-%d") in x])
+    })
+        
+        
+
     return render(request, "frontend/overviewlog.html", {"logs_by_vm": results})
 
 

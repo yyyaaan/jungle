@@ -101,6 +101,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        # for sqlite write lock timeout
+        'OPTIONS': {
+            'timeout': 15,
+        }
     }
 }
 
@@ -189,6 +193,14 @@ if not DEBUG:
                 'backupCount': 2,
                 'formatter': 'verbose',
             },
+            'baselogfile': {
+                'level':'DEBUG',
+                'class':'logging.handlers.RotatingFileHandler',
+                'filename': "jungle-base.log",
+                'maxBytes': int(1e6) ,
+                'backupCount': 2,
+                'formatter': 'verbose',
+            },
             'console':{
                 'level':'INFO',
                 'class':'logging.StreamHandler',
@@ -196,13 +208,17 @@ if not DEBUG:
             },
         },
         'loggers': {
+            'dataprocessor': {
+                'handlers': ['logfile'],
+                'level': 'INFO',
+            },
             'django': {
-                'handlers': ['logfile'], #'console' not used in prod
+                'handlers': ['baselogfile'], #'console' not used in prod
                 'propagate': True,
                 'level':'INFO',
             },
             'django.db.backends': {
-                'handlers': ['logfile'],
+                'handlers': ['baselogfile'],
                 'level': 'INFO',
                 'propagate': False,
             },

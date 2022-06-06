@@ -24,6 +24,9 @@ class VmTrail(models.Model):
     event = models.CharField("Event", max_length=1023)
     info = models.CharField("Information", blank=True, max_length=9999)
     timestamp = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        get_latest_by = 'timestamp'
 
     @admin.display(boolean=True, ordering="-timestamp", description="Event within 24hrs")
     def is_within_24_hours(self):
@@ -40,12 +43,19 @@ class VmActionLog(models.Model):
     result = models.CharField("Action Output", blank=True, max_length=9999)
     timestamp = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        get_latest_by = 'timestamp'
+
     @admin.display(boolean=True, ordering="-timestamp", description="Event within 24hrs")
     def is_within_24_hours(self):
         return self.timestamp >= (timezone.now() - timedelta(days=1)) 
 
     def vmids_applied(self):
         return ", ".join([x.vmid for x in self.vmids.all()])
+
+    def __str__(self):
+        return f"{self.event}--{self.info} on {self.timestamp}"
+
 
 
 class YCrawlConfig(models.Model):

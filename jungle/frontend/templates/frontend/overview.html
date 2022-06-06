@@ -5,8 +5,7 @@
 {% block content %} 
 <div class="col s12 m3"  style="background-color:snow">
     <h3>{{completed_percent}}</h3>
-    <p>Completion of scheduled</p>
-    <p><a href="{{gss_link}}" target="_blank">{{info_str}}</a></p>
+    <p>{% autoescape off %}{{jobs_detail}}{% endautoescape %}</p>
 </div>
 <div class="col s12 m9">
     <ul class="collapsible">
@@ -44,10 +43,10 @@
 </div>
 <div class="col s12 m3"  style="background-color:snow">
     <h3>{{n_jobs}}</h3>
-    <p>{% autoescape off %}{{jobs_detail}}{% endautoescape %}</p>
-    <p><a href="/rundata"> <i class="small material-icons">assessment</i> </a>  
-       <a href="{{gso_link}}" target="_blank"><i class="small material-icons">folder_open</i></a>  
-       <a href="https://datastudio.google.com/reporting/d69d4892-6779-4d66-8b38-2fee9fd00dc1/page/kE3mC" target="_blank"><i class="small material-icons">dashboard</i> </a>
+    <p>{% autoescape off %}{{jobs_detail2}}{% endautoescape %}</p>
+    <p> <a href="{{gss_link}}" target="_blank"><i class="small material-icons">inbox</i></a> 
+        <a href="{{gso_link}}" target="_blank"><i class="small material-icons">folder_open</i></a>  
+        <a href="https://datastudio.google.com/reporting/d69d4892-6779-4d66-8b38-2fee9fd00dc1/page/kE3mC" target="_blank"><i class="small material-icons">dashboard</i> </a>
     </p>
 </div>
 <button id="log-btn" class="waves-effect waves-light btn-flat right" onclick="showLog()">click to load logs</button>

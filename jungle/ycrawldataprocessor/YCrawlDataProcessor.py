@@ -1,19 +1,18 @@
 from os import listdir, remove
-from os.path import exists
 from bs4 import BeautifulSoup
 from random import shuffle, choices
 from pandas import DataFrame, concat, read_parquet, to_datetime, isna
 from requests import get
 from datetime import datetime, timedelta
 from google.cloud import storage, bigquery
+from logging import getLogger
+import warnings
 
 from .LineHelper import send_df_as_flex
 from .FileProcessor import FileProcessor
+from jungle.settings import MEDIA_ROOT
 
-"""
-Know issues:
-- file not copied meta all completed not saved
-"""
+logger = getLogger("ycrawl")
 
 class YCrawlDataProcessor():
     """
@@ -22,8 +21,14 @@ class YCrawlDataProcessor():
     _func private; _x_func only used for another private function
     """
 
-    def __init__(self, scope, exchange, bucket_name, archive_name, output_name, msg_endpoint, testnum=0, batch_size=200):
-        dt = datetime.now()
+    def __init__(
+        self, scope, exchange, bucket_name, archive_name, output_name, msg_endpoint,
+        testnum=0, batch_size=200, ref_date=datetime.now(),
+        force_skip_processing = False
+    ):
+        
+        self.ref_date = ref_date
+        self.force_skip_processing = force_skip_processing
 
         self.bucket_name = bucket_name
         self.archive_name = archive_name
@@ -35,7 +40,7 @@ class YCrawlDataProcessor():
         gscb = gsclient.get_bucket(self.bucket_name)
         self.file_list = [
             x.name 
-            for x in gscb.list_blobs(prefix=f"{scope}/{dt.strftime('%Y%m/')}{dt.strftime('%d')}") 
+            for x in gscb.list_blobs(prefix=f"{scope}/{self.ref_date.strftime('%Y%m/')}{self.ref_date.strftime('%d')}") 
             if x.name.endswith(".pp")
         ]
         shuffle(self.file_list)
@@ -54,6 +59,9 @@ class YCrawlDataProcessor():
         self.flights = None
         self.hotels = None
         self.msg_endpoint = msg_endpoint
+        self.final_parquet_path = MEDIA_ROOT + "cache/" + self.ref_date.strftime("%Y%m%d") + "_"
+
+        logger.info(f"initiated processing with {len(self.file_list)} files")
 
 
     def get_next_batch(self):
@@ -61,9 +69,10 @@ class YCrawlDataProcessor():
         file_list = self.file_list[self.index_for_the_batch : next_index]
 
         # tag for multithreading to save results
-        tag = datetime.now().strftime("%m%d") 
+        tag = MEDIA_ROOT + "cache/"
+        tag += self.ref_date.strftime("%m%d") 
         tag += f"_{self.index_for_the_batch:04}_{next_index:04}"
-        self.cached_list.append(f"{tag}.gzip")
+        self.cached_list.append(f"{tag}")
         
         # set for next batch
         self.index_for_the_batch = next_index
@@ -71,14 +80,27 @@ class YCrawlDataProcessor():
 
 
     def start_batch_processing(self):
+
+        start_time = datetime.now()
+
         flag, threads = True, []
+        if self.force_skip_processing:
+            while flag:  
+                flag, filelist, tag = self.get_next_batch()
+            logger.warn("Skipped processing!")
+            return False
+
         while flag:  
             flag, filelist, tag = self.get_next_batch()
-            t = FileProcessor(filelist, tag, self.bucket_name, self.archive_name)
+            t = FileProcessor(filelist, tag, self.bucket_name, self.archive_name, self.ref_date)
             threads.append(t)
             t.start()
+
+        logger.info(f"Files are distributed over {len(self.cached_list)} batches")
         for t in threads:
             t.join()
+
+        logger.info(f"Processing time in seconds: {(datetime.now() - start_time).seconds}")
         return True
 
 
@@ -106,44 +128,46 @@ class YCrawlDataProcessor():
     def _get_ecb_rate(self):
         try:
             ecb = get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml")
-            soup = BeautifulSoup(ecb.text, "html.parser")
-            ecb_list = [x.attrs for x in soup.select("Cube")]
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore") # no xml package, warnings ignored
+                soup = BeautifulSoup(ecb.text, "html.parser")
+                ecb_list = [x.attrs for x in soup.select("Cube")]
             ecb_list = [{"currency": str(x["currency"]), "rate": float(x["rate"])} for x in ecb_list if 'rate' in x.keys()]
             x_list = [{"currency": str(x), "rate": float(self.xchange_rates[x])} for x in self.xchange_rates.keys()]
             # no history is hold for ecb rate
             exchange_rate = DataFrame(ecb_list + x_list)
             self._x_upload_to_bq(exchange_rate, "ECBrate", write_disposition="WRITE_TRUNCATE")
         except:
-            print("ECB exchange rate NOT upated, using previous saved rates")
+            logger.warn("ECB exchange rate NOT upated, using previous saved rates")
             exchange_rate = self._bq_client.query("select * from yyyaaannn.yCrawl.ECBrate").result().to_dataframe()
 
         self.xchange_rates = exchange_rate
         return True
 
-
-    def _finalize_df_errs(self):
+    def _get_processed_parquets(self, ext):
         flists = []
         for x in self.cached_list:
             try:
-                flists.append(read_parquet("/home/yan/jungle/jungle/e" + x))
+                flists.append(read_parquet(x + ext))
             except Exception as e:
-                print(str(e))
-        dfs = concat(flists)
+                continue
 
+        logger.info(f"Sucessfully read {len(flists)} {ext}...OK")
+        return concat(flists)
+
+    def _finalize_df_errs(self):
+        df = self._get_processed_parquets("_e.gzip")
         if self._upload_flag:
             self._x_upload_to_bq(df, "issues")
         return True
 
-
     def _finalize_df_flights(self):
-        flists = []
-        for x in self.cached_list:
-            try:
-                flists.append(read_parquet("/home/yan/jungle/jungle/f" + x))
-            except Exception as e:
-                print(str(e))
-        df_flights = concat(flists)
-        
+        df_flights = self._get_processed_parquets("_f.gzip")
+        if df_flights.shape[0] == 0:
+            logger.warn("No successful flights attempt")
+            self.flights = DataFrame()
+            return False, "no valid flights"
+
         df_flights_out = (df_flights
             .groupby(["route", "ddate", "rdate"])
             .agg(ts=("ts", max))
@@ -153,26 +177,20 @@ class YCrawlDataProcessor():
         df_flights_out["eur"] = round((df_flights_out["price"]/df_flights_out["rate"]).astype(float))
         df_flights_out = df_flights_out[["route", "ddate", "rdate", "eur", "ccy", "price", "ts", "vmid"]]
 
+        fname = self.final_parquet_path + "flights.parquet.gzip"
+        df_flights.to_parquet(fname, compression='gzip')
         if self._upload_flag:
             self._x_upload_to_bq(df_flights_out, "flights")
-            fname = f"x{datetime.now().strftime('%Y%m%d')}_flights.parquet.gzip"
-            df_flights.to_parquet(fname, compression='gzip')
-            blob = self._gsbucket_output.blob(f"yCrawl_Output/{datetime.now().strftime('%Y%m')}/{fname}")
+            blob = self._gsbucket_output.blob(f"yCrawl_Output/{self.ref_date.strftime('%Y%m')}/{fname.split('/')[-1]}")
             blob.upload_from_filename(fname)
 
         self.flights = df_flights_out
+        logger.info(f"Flights finalized with {self.flights.shape}...OK")
         return True
 
 
     def _finalize_df_hotels(self):
-        flists = []
-        for x in self.cached_list:
-            try:
-                flists.append(read_parquet("/home/yan/jungle/jungle/h" + x))
-            except Exception as e:
-                print(str(e))
-        df_hotels = concat(flists)
-        
+        df_hotels = self._get_processed_parquets("_h.gzip")
         main_keys = ["hotel", "room_type", "rate_type", "check_in", "check_out"]
         df_hotels_out = (df_hotels
             .groupby(main_keys)
@@ -186,40 +204,44 @@ class YCrawlDataProcessor():
         df_hotels_out = df_hotels_out[df_hotels_out['eur'] > 10]
         df_hotels_out = df_hotels_out[["hotel", "room_type", "rate_type", "nights", "eur", "check_in", "check_out", "eur_sum", "ccy", "rate_avg", "rate_sum", "ts", "vmid"]]
 
+        fname = self.final_parquet_path + "hotels.parquet.gzip"
+        df_hotels.to_parquet(fname, compression='gzip')
+
         if self._upload_flag:
             self._x_upload_to_bq(df_hotels_out, "hotels")
-            fname = f"x{datetime.now().strftime('%Y%m%d')}_hotels.parquet.gzip"
-            df_hotels.to_parquet(fname, compression='gzip')
-            blob = self._gsbucket_output.blob(f"yCrawl_Output/{datetime.now().strftime('%Y%m')}/{fname}")
+            blob = self._gsbucket_output.blob(f"yCrawl_Output/{self.ref_date.strftime('%Y%m')}/{fname.split('/')[-1]}")
             blob.upload_from_filename(fname)
 
         self.hotels = df_hotels_out
+        logger.info(f"Hotels finalized with {self.hotels.shape}...OK")
         return True
 
 
     def _send_summary(self):
-        dff, dfh = self.flights, self.hotels
+        dff, dfh, df_list = self.flights, self.hotels, []
 
-        dff["ddate"] = to_datetime(dff.ddate)
-        dff["weekstart"] = dff.ddate.dt.to_period('W').apply(lambda r: r.start_time)
-        dff["title"] = "Flights to Australia on QR Business"
-        for keyword in ["DXB", "Dubai", "AUH", "Abu Dhabi"]:
-            dff.loc[dff['route'].str.contains(keyword),'title'] = 'QR UAE on Economy'
-        flights_short = (dff
-            .groupby(["title", "weekstart"], as_index=False)
-            .agg(best=("eur", min))
-        )
+        if dff.shape[0] !=0:
+            dff["ddate"] = to_datetime(dff.ddate)
+            dff["weekstart"] = dff.ddate.dt.to_period('W').apply(lambda r: r.start_time)
+            dff["title"] = "Flights to Australia on QR Business"
+            for keyword in ["DXB", "Dubai", "AUH", "Abu Dhabi"]:
+                dff.loc[dff['route'].str.contains(keyword),'title'] = 'QR UAE on Economy'
+            df_list.append((dff
+                .groupby(["title", "weekstart"], as_index=False)
+                .agg(best=("eur", min))
+            ))
 
-        dfh["check_in"] = to_datetime(dfh.check_in)
-        dfh["weekstart"] = dfh.check_in.dt.to_period('W').apply(lambda r: r.start_time)
-        dfh["title"] = dfh["hotel"]
-        hotels_short = (dfh
-            [(~dfh.rate_type.str.contains("Non")) & (~dfh.rate_type.str.contains("Prepay"))]
-            .groupby(["title", "weekstart"], as_index=False)
-            .agg(best=("eur", min))
-        )
+        if dfh.shape[0] !=0:
+            dfh["check_in"] = to_datetime(dfh.check_in)
+            dfh["weekstart"] = dfh.check_in.dt.to_period('W').apply(lambda r: r.start_time)
+            dfh["title"] = dfh["hotel"]
+            df_list.append((dfh
+                [(~dfh.rate_type.str.contains("Non")) & (~dfh.rate_type.str.contains("Prepay"))]
+                .groupby(["title", "weekstart"], as_index=False)
+                .agg(best=("eur", min))
+            ))
 
-        df_msg = concat([flights_short, hotels_short])
+        df_msg = concat(df_list)
         df_msg['content'] = df_msg.weekstart.dt.strftime("%b-%d") + "  " + df_msg.best.astype(str)
 
         send_df_as_flex(df=df_msg, text="Summary for yCrawl Outputs", msg_endpoint=self.msg_endpoint)
@@ -244,7 +266,7 @@ class YCrawlDataProcessor():
         """called by _send_drift"""
         df_hotels_final = self.hotels
         shorten = lambda x: " ".join(str(x).split(" ")[:3] + ["\n >"])
-        tag_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        tag_date = (self.ref_date - timedelta(days=days)).strftime("%Y-%m-%d")
 
         hotel_pre = self._bq_client.query(f"""
         select hotel, min(eur) as min_eur, count(*) as n_rows
@@ -280,7 +302,7 @@ class YCrawlDataProcessor():
         """called by _send_drift"""
         df_flights_final = self.flights
         shorten = lambda x: " ".join(str(x).split(" ")[:3] + ["\n >"])
-        tag_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        tag_date = (self.ref_date - timedelta(days=days)).strftime("%Y-%m-%d")
 
         # further simplied to departure city only
         flights_pre = self._bq_client.query(f"""
@@ -316,6 +338,10 @@ class YCrawlDataProcessor():
 
 
     def _send_drift(self):
+        if self.hotels.shape[0] == 0 or self.flights.shape[0] == 0:
+            logger.warn("Drift will NOT be processed due to empty data")
+            return False
+
         price1h, row1h = self._x_get_hotels_drift_by_day(1)
         price4h, row4h = self._x_get_hotels_drift_by_day(4)
         price1f, row1f = self._x_get_flights_drift_by_day(1)
@@ -334,7 +360,13 @@ class YCrawlDataProcessor():
             df=msg_df, msg_endpoint=self.msg_endpoint, text="Data Drift Summary", 
             color="11", size="xxs", sort=True)
 
+        return True
+
 
     def _clear_files(self):
-        [remove(x) for x in listdir() if x.endswith(".gzip") and datetime.now().strftime("%m%d") in x]
+        [
+            remove(MEDIA_ROOT + "cache/" + x)
+            for x in listdir(MEDIA_ROOT + "cache/")
+            if self.ref_date.strftime('%m%d_') in x
+        ]
         return True

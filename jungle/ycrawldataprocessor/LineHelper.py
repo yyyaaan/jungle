@@ -2,7 +2,9 @@
 from os import getenv
 from requests import post
 from random import randint
+from logging import getLogger
 
+logger = getLogger("ycrawl")
 #%%
 def send_df_as_flex(df, cols=['title', 'content'], text="info", color="RANDOM", size="xs", sort=False, msg_endpoint="XXX", reciever="cloud"):
 
@@ -51,15 +53,12 @@ def send_df_as_flex(df, cols=['title', 'content'], text="info", color="RANDOM", 
 
     flex_json = {"type": "carousel", "contents": bubbles}
     if len(msg_endpoint)>10:
-        try:
-            res = post(
-                msg_endpoint,
-                headers={"Authorization": f"Bearer {getenv('tttoken')}"},
-                json = {"to": reciever, "text": text, "flex": flex_json}
-            )
-            # print(f"{res.status_code} {res.text}")                
-        except Exception as e:
-            # print(flex_json)
-            print(f"failed to post line message due to {str(e)}")
+        res = post(
+            msg_endpoint,
+            headers={"Authorization": f"Bearer {getenv('tttoken')}"},
+            json = {"to": reciever, "text": text, "flex": flex_json}
+        )
+        if res.status_code > 299:
+            logger.warn(f"line message {res.status_code} {res.text}")
 
     return flex_json
