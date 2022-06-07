@@ -1,12 +1,13 @@
 from time import sleep
+from json import dumps, loads
 from threading import Thread
 from datetime import date, datetime, timedelta
 from google.cloud import storage
 from django.db.models import Count
 
+from jungle.settings import MEDIA_ROOT
 from ycrawl.serializers import *
 from ycrawldataprocessor.YCrawlDataProcessor import YCrawlDataProcessor
-
 
 
 
@@ -182,10 +183,11 @@ class YCrawlJobs:
         return True
 
     def register_completion(self, deletion_detection=False):
-        """Scan completed jobs and update DB"""
+        """Scan completed jobs and update DB + save to a cached file"""
         runmode, limit_retry = YCrawlConfig.get_value('scope'), int(YCrawlConfig.get_value('max-retry'))
+        bucket_name = YCrawlConfig.get_value('bucket')
         dstr = date.today().strftime("%Y%m%d")
-        bucket = storage.Client().get_bucket(YCrawlConfig.get_value('bucket'))
+        bucket = storage.Client().get_bucket(bucket_name)
 
         files_in_storage = [x.name for x in bucket.list_blobs(prefix=f'{runmode}/{date.today().strftime("%Y%m/%d")}')]
         keys_completed = [dstr + "_" + x.split("_")[1] for x in files_in_storage if not x.endswith("ERR.pp")]
@@ -202,8 +204,35 @@ class YCrawlJobs:
             else:            
                 objs.filter(jobid=x).update(note=f"{keys_error.count(x)}E")
         
-        # VmTrail(vmid="self", event="updated job status", info="completion status has been updated").save()
+        # save to a json file, organized by brands
+        try:
+            main_list = [{
+                "key": x.jobid.split("_")[1],
+                "server": x.vmid.vmid,
+                "brand": x.weburl.split(".")[1].upper(),
+                "desc": ("OK" if x.note[:1] != "X" and x.completion else "") + x.note.replace("X", ""),
+                "link": [f'https://storage.cloud.google.com/{bucket_name}/{xx}' for xx in files_in_storage if x.jobid in xx],
+                "uurl": x.weburl
+            } for x in BatchJobList.get_today_objects()]
+
+            unique_brands = set([x['brand'] for x in main_list])
+
+            output_list = [{
+                "brand": the_brand,
+                "list": [x for x in main_list if x['brand'] == the_brand]
+            } for the_brand in sorted(list(unique_brands))]
+            
+            # sort has to be done in for
+            for x in output_list:
+                x["len"] = f"{len([y for y in x['list'] if 'OK' in y['desc']])} of {len(x['list'])}"
+                x["list"].sort(key=lambda x: x["desc"] + x["key"])
+
+            with open(f"{MEDIA_ROOT}cache/{dstr}_meta.json", "w") as f:
+                f.write(dumps(output_list, indent=4))
         
+        except Exception as e:
+            logger.warn(f"fail to write to json due to {str(e)}")
+
         return True
 
 
@@ -229,7 +258,13 @@ class YCrawlJobs:
                 logger.warn("Data processor already started but called again 2???")
                 return False, "data processor already started"
 
+            # logging final status / upload meta to output bucket / clean db
             VmTrail.objects.filter(vmid=self.tag).update(event=self.done)
+            try:
+                self.final_upload_and_clean_db()
+            except Exception as e:
+                logger.warn(f"failed to upload completion metadata or clean db due {str(e)}")
+
             thread = Thread(target=run_data_processor)
             thread.start()
             return True, "data processor (threaded) has started"
@@ -261,7 +296,6 @@ class YCrawlJobs:
         vmids = [x["vmid"] for x in remaining if x["todo"] > limit]
         infos = [f"{x['vmid'][7:]}-{x['todo']}" for x in remaining]
 
-
         if len(vmids):
             vmstartstop(vmids, "START", f"checkin {', '.join(infos)}")
             return False, "cralwer continues"
@@ -270,9 +304,21 @@ class YCrawlJobs:
                 self.on_vm_completed()
             return True, self.done
 
+    def final_upload_and_clean_db(self):
+        # upload final meta to output
+        with open(f"{MEDIA_ROOT}cache/{date.today().strftime('%Y%m%d')}_meta.json", "r") as f:
+            storage_file_list = loads(f.read())
+        final_meta = {
+            "job-groups": YCrawlConfig.get_json_by_name("job-groups"),
+            "special-exchange-rates": YCrawlConfig.get_json_by_name("xchange-rates"),
+            "file-completed": storage_file_list,
+        }
+        storage.Client(). \
+            get_bucket(YCrawlConfig.get_value('bucket-output')). \
+            blob(f"yCrawl_Output/{date.today().strftime('%Y%m')}/{date.today().strftime('%Y%m%d')}_meta.json"). \
+            upload_from_string(dumps(final_meta, indent=4))
 
-    def cleandb_and_sink(self, depth=1):
-        # delete non-important infomation
+        # non-import dbs 
         VmTrail.objects.filter(vmid="self", timestamp__date=date.today()).delete()
         VmActionLog.objects \
             .filter(timestamp__date=date.today()) \
@@ -280,15 +326,9 @@ class YCrawlJobs:
             .exclude(result__icontains="starting") \
             .delete()
 
-        # sink data
-
-        # older than 3 days
-        if depth > 1:
-            VmTrail.objects \
-                .exclude(timestamp__date=date.today()) \
-                .exclude(timestamp__date=date.today() - timedelta(days=1)) \
-                .exclude(timestamp__date=date.today() - timedelta(days=2)) \
-                .delete()
+        # older than 9 days Trails (actions not deleted yet)
+        VmTrail.objects.filter(timestamp__date__lt = (date.today() - timedelta(days=9))).delete()
+        VmActionLog.objects.filter(timestamp__date__lt = (date.today() - timedelta(days=9))).delete()
 
         return True
 

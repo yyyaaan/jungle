@@ -4,15 +4,15 @@ from django.conf import settings
 from django.urls import URLPattern, URLResolver
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from datetime import date
-from logging import getLogger
+from datetime import date, datetime
 from json import loads, dumps
+from plotly.utils import PlotlyJSONEncoder
+import plotly.express as px
 
 from frontend.models import *
-from frontend.scripts import *
+from ycrawl.models import *
 from ycrawl.vmmanager import vm_list_all
-from ycrawl.ycrawlurl import *
-from jungle.settings import BASE_DIR
+from jungle.settings import BASE_DIR, MEDIA_ROOT
 
 
 # helper function (will be called be sitemap)
@@ -130,12 +130,24 @@ def job_overview(request):
     n_error = jobs.filter(note__endswith="E").exclude(note__startswith="X").count()
     n_ok = jobs.filter(completion=True).exclude(note__startswith="X").count()
 
+    try:
+        with open(f"{MEDIA_ROOT}cache/{date.today().strftime('%Y%m%d')}_meta.json", "r") as f:
+            storage_file_list = loads(f.read())
+            extra_info = "<small>completion metadata loaded from local cached</small>"
+    except:
+        storage_file_list = [{
+            "brand": "Completion metadata not available", 
+            "len": "*",
+            "list": [{"key": "cache not ready", "server": "-", "desc": "ERR", "uurl": "/ycrawl/joblist/checkin/"}]
+        }]
+        extra_info = "<small>completion meta data not yet available (run checkin?)</small>"
+
     pagedata=dict(
         completed_percent = f"{(1-n_todo/n_all):.2%}",
         n_jobs = f"{n_all-n_todo}/{n_all}",
         jobs_detail = f"{n_ok} completed ok<br/>{n_error}+{n_forfeit} issues",
-        jobs_detail2 = f"~{n_ok/(n_all-n_todo):.0%} success rate since last checkin.",
-        all_files = storage_file_viewer(gsbucket, runmode, jobs),
+        jobs_detail2 = f"~{n_ok/(n_all-n_todo):.0%} success rate since last checkin.<br>{extra_info}",
+        all_files = storage_file_list,
         gss_link = f"https://console.cloud.google.com/storage/browser/{gsbucket}/{runmode}/{datetime.now().strftime('%Y%m/%d')}",
         gso_link = f"https://console.cloud.google.com/storage/browser/yyyaaannn-us/yCrawl_Output/{datetime.now().strftime('%Y%m')}",
     )
@@ -166,8 +178,6 @@ def job_overview_log(request):
         "name": "Key-LOG",
         "logs": "<br/>".join([x.split("|")[0] for x in logs if date.today().strftime("%Y-%m-%d") in x])
     })
-        
-        
 
     return render(request, "frontend/overviewlog.html", {"logs_by_vm": results})
 
@@ -175,6 +185,7 @@ def job_overview_log(request):
 
 def job_overview_vmplot(request):
     _, vm_list = vm_list_all()
+
     pagedata = {"graphJSON": get_geoplot_json(
         vms=vm_list, 
         height=int(0.5 * int(request.GET["width"])), 
@@ -182,3 +193,59 @@ def job_overview_vmplot(request):
     )}
     return render(request, 'frontend/overviewvmplot.html', pagedata)
 
+
+def get_geoplot_json(vms, height=380, width=600):
+
+    short_dict = {
+        "csc":{"lat": 60.2055, "lon": 24.6559, "city": "Espoo, Finland", "vendor": "CSC"},
+        "fi": {"lat": 60.5693, "lon": 27.1878, "city": "Hamina, Finland", "vendor": "Google"},
+        "fr": {"lat": 48.8566, "lon": -2.3522, "city": "Paris, France", "vendor": "AWS"},
+        "ie": {"lat": 53.3498, "lon": -6.2603, "city": "Dublin, Ireland", "vendor": "Azure"},
+        "se": {"lat": 59.3293, "lon": 18.0686, "city": "Stockholm, Sweden", "vendor": "AWS"},
+        "pl": {"lat": 52.2297, "lon": 21.0122, "city": "Warsaw, Poland", "vendor": "Google"},
+        "nl": {"lat": 52.3676, "lon":  4.9041, "city": "Amsterdam, Netherlands", "vendor": "Azure"},
+        "processor": {"lat": 60.1,"lon": 25.6, "city": "Hamina, Finalnd (inaccurate position)", "vendor": "Google"},
+    }
+
+    std_status = lambda x: "Ready" if x in ["TERMINATED", "STOPPED", "VMDEALLOCATED", "shelved_offloaded"] else x
+
+    vm_short = [{
+        "vmid": x["vmid"],
+        "lat": short_dict[x["vmid"].split("-")[-1]]["lat"],
+        "lon": short_dict[x["vmid"].split("-")[-1]]["lon"],
+        "Vendor": short_dict[x["vmid"].split("-")[-1]]["vendor"],
+        "city": short_dict[x["vmid"].split("-")[-1]]["city"],
+        "Status": std_status(x["header"].split(" ")[1]),
+        "desc": x["header"].replace(" (", "<br>("),
+    } for x in vms
+    if x["vmid"].split("-")[-1] in short_dict]
+
+    fig = px.scatter_geo(
+        vm_short,
+        lat="lat",
+        lon="lon",
+        symbol="Status",
+        color="Vendor",
+        hover_name="vmid",
+        custom_data=["desc", "city"],
+    )
+
+    fig.update_geos(
+        framewidth=0,
+        center={"lat": 57, "lon": 10},
+        showcountries=True,
+        showcoastlines=False,
+        countrycolor="snow",
+        projection_scale=6,
+    )
+    fig.update_layout(
+        height=height, width=width,
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        legend={"x": 0.01, "y": 0.99}
+    )
+    fig.update_traces(
+        marker={"size": 13},
+        hovertemplate = "%{customdata[0]}<br><br><i>%{customdata[1]}</i>"
+    )
+
+    return dumps(fig, cls=PlotlyJSONEncoder)

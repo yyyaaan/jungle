@@ -118,12 +118,10 @@ class YCrawlDataProcessor():
         self._send_drift()
         return True
 
-
     def reset_batch(self):
         """only use in extreme case"""
         self.index_for_the_batch = 0
         return "OK"
-
 
     def _get_ecb_rate(self):
         try:
@@ -188,7 +186,6 @@ class YCrawlDataProcessor():
         logger.info(f"Flights finalized with {self.flights.shape}...OK")
         return True
 
-
     def _finalize_df_hotels(self):
         df_hotels = self._get_processed_parquets("_h.gzip")
         main_keys = ["hotel", "room_type", "rate_type", "check_in", "check_out"]
@@ -215,7 +212,6 @@ class YCrawlDataProcessor():
         self.hotels = df_hotels_out
         logger.info(f"Hotels finalized with {self.hotels.shape}...OK")
         return True
-
 
     def _send_summary(self):
         dff, dfh, df_list = self.flights, self.hotels, []
@@ -248,7 +244,6 @@ class YCrawlDataProcessor():
 
         return True
 
-
     def _x_upload_to_bq(self, df, short_id, write_disposition="WRITE_APPEND"):
         schema = [bigquery.SchemaField(str(x), "INT64") for x in df.columns if str(x).startswith("eur")]
         job_config = bigquery.LoadJobConfig(
@@ -260,7 +255,6 @@ class YCrawlDataProcessor():
             destination=f"yyyaaannn.yCrawl.{short_id}", 
             job_config=job_config
         ).result()
-
 
     def _x_get_hotels_drift_by_day(self, days=1, threshold_price=10, threshold_row=30):
         """called by _send_drift"""
@@ -296,7 +290,6 @@ class YCrawlDataProcessor():
         ]
 
         return price_drifts, row_drifts
-
 
     def _x_get_flights_drift_by_day(self, days=1, threshold_price=10, threshold_row=30):
         """called by _send_drift"""
@@ -336,7 +329,6 @@ class YCrawlDataProcessor():
 
         return price_drifts, row_drifts
 
-
     def _send_drift(self):
         if self.hotels.shape[0] == 0 or self.flights.shape[0] == 0:
             logger.warn("Drift will NOT be processed due to empty data")
@@ -362,11 +354,10 @@ class YCrawlDataProcessor():
 
         return True
 
-
     def _clear_files(self):
         [
             remove(MEDIA_ROOT + "cache/" + x)
             for x in listdir(MEDIA_ROOT + "cache/")
-            if self.ref_date.strftime('%m%d_') in x
+            if self.ref_date.strftime('%m%d_') in x and x.endswith(".gzip")
         ]
         return True
