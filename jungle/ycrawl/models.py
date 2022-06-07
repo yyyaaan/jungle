@@ -100,13 +100,3 @@ class BatchJobList(models.Model):
     @classmethod
     def get_today_objects(cls):
         return cls.objects.filter(jobid__startswith=date.today().strftime("%Y%m%d"))
-
-
-def cleandb():
-    VmTrail.objects \
-        .exclude(timestamp__date=date.today()) \
-        .exclude(timestamp__date=date.today() - timedelta(days=1)) \
-        .exclude(timestamp__date=date.today() - timedelta(days=2)) \
-        .delete()
-
-    return True

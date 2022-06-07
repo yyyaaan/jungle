@@ -263,7 +263,7 @@ class YCrawlJobs:
             try:
                 self.final_upload_and_clean_db()
             except Exception as e:
-                logger.warn(f"failed to upload completion metadata or clean db due {str(e)}")
+                logger.warn(f"failed to upload completion metadata or clean db due to {str(e)}")
 
             thread = Thread(target=run_data_processor)
             thread.start()
@@ -313,10 +313,10 @@ class YCrawlJobs:
             "special-exchange-rates": YCrawlConfig.get_json_by_name("xchange-rates"),
             "file-completed": storage_file_list,
         }
-        storage.Client(). \
-            get_bucket(YCrawlConfig.get_value('bucket-output')). \
-            blob(f"yCrawl_Output/{date.today().strftime('%Y%m')}/{date.today().strftime('%Y%m%d')}_meta.json"). \
-            upload_from_string(dumps(final_meta, indent=4))
+        storage.Client() \
+            .get_bucket(YCrawlConfig.get_value('bucket-output')) \
+            .blob(f"yCrawl_Output/{date.today().strftime('%Y%m')}/{date.today().strftime('%Y%m%d')}_meta.json") \
+            .upload_from_string(dumps(final_meta, indent=4))
 
         # non-import dbs 
         VmTrail.objects.filter(vmid="self", timestamp__date=date.today()).delete()
@@ -326,10 +326,15 @@ class YCrawlJobs:
             .exclude(result__icontains="starting") \
             .delete()
 
-        # older than 9 days Trails (actions not deleted yet)
+        # older than 9 days (job 3 day) Trails (actions not deleted yet)
+        BatchJobList.objects \
+            .exclude(jobid__startswith=(date.today() - timedelta(days=0)).strftime("%Y%m%d")) \
+            .exclude(jobid__startswith=(date.today() - timedelta(days=1)).strftime("%Y%m%d")) \
+            .exclude(jobid__startswith=(date.today() - timedelta(days=2)).strftime("%Y%m%d")) \
+            .delete()
         VmTrail.objects.filter(timestamp__date__lt = (date.today() - timedelta(days=9))).delete()
         VmActionLog.objects.filter(timestamp__date__lt = (date.today() - timedelta(days=9))).delete()
-
+        
         return True
 
 

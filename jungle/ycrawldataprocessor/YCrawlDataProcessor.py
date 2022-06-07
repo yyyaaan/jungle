@@ -150,7 +150,7 @@ class YCrawlDataProcessor():
             except Exception as e:
                 continue
 
-        logger.info(f"Sucessfully read {len(flists)} {ext}...OK")
+        logger.info(f"Sucessfully read {len(flists)} {ext[1:]}s...OK")
         return concat(flists)
 
     def _finalize_df_errs(self):
