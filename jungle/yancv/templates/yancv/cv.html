@@ -3,7 +3,7 @@
 {% static "" as StaticUrl %}
 
 
-{% block title %}{{h1text}}{% endblock %}
+{% block title %}about Yan Pan{% endblock %}
 
 {% block head %}
 <style>
@@ -46,6 +46,10 @@ h5{
 .left-border{
   border-left: #03a9f4 solid 5px;
   padding-left: 30px;
+}
+#decorative {
+    margin-top: 29px;
+    margin-bottom: 35px;
 }
 #decorative > .dec-1 {
    border-top: #aa96da solid 3px;
@@ -113,7 +117,7 @@ function expandAllAcademics() {
 
 <div class="col s3">
     <h2 style="color:transparent">Thank You!</h2>
-    <p class="mono">
+    <p class="mono truncate">
         <a href="mailto:yan@yan.fi"><i class="material-icons">email</i> yan@yan.fi</a><br>
         <a href="#!"><i class="material-icons">phone</i> +358 44 9199 857</a><br>
         <a href="#!"><i class="material-icons">place</i> Helsinki, FI-00340</a><br>
@@ -140,7 +144,7 @@ function expandAllAcademics() {
 
 
 {% block contentmore %}
-<div class="col s3 m3">
+<div class="col s12 m6 l3">
     <div class="icon-block icon-block-1">
         <h5 class="center"><i class="material-icons">whatshot</i><br>True Passion</h5>
         <p class="light">A passionate team contributor backeded with agility and innovation.</p>
@@ -153,7 +157,7 @@ function expandAllAcademics() {
     </div>
 </div>
 
-<div class="col s3 m3">
+<div class="col s12 m6 l3">
     <div class="icon-block icon-block-2">
         <h5 class="center"><i class="material-icons">widgets</i><br>Authentic Skills</h5>
 
@@ -187,7 +191,7 @@ function expandAllAcademics() {
     </div>
 </div>
 
-<div class="col s6 m6">
+<div class="col s12 m12 l6">
     <div class="icon-block icon-block-3">
         <h5 class="center"><i class="material-icons">work</i><br>Accumulated Expertise</h5>
 
@@ -233,6 +237,11 @@ function expandAllAcademics() {
 
 
 {% block contentevenmore %}
+<div id="decorative" class="row">
+    <div class="col s12 m6 l3 dec-1"></div>
+    <div class="col s12 m6 l3 dec-2"></div>
+    <div class="col s12 m12 l6 dec-3"></div>
+</div>
 <div id="cert-academic" class="col m12 l5 offset-l1">
     <ul class="collapsible z-depth-0">
         <li>
@@ -298,8 +307,6 @@ function expandAllAcademics() {
     <p>
 
     </p>
-    <p style="margin-top:50px; text-align:center;"><a href="#workflow">How my data workflow works? Check here</a></p>
-
 
 </div>
 

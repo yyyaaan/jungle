@@ -176,7 +176,7 @@ class YCrawlDataProcessor():
         df_flights_out = df_flights_out[["route", "ddate", "rdate", "eur", "ccy", "price", "ts", "vmid"]]
 
         fname = self.final_parquet_path + "flights.parquet.gzip"
-        df_flights.to_parquet(fname, compression='gzip')
+        df_flights_out.to_parquet(fname, compression='gzip')
         if self._upload_flag:
             self._x_upload_to_bq(df_flights_out, "flights")
             blob = self._gsbucket_output.blob(f"yCrawl_Output/{self.ref_date.strftime('%Y%m')}/{fname.split('/')[-1]}")
@@ -202,7 +202,7 @@ class YCrawlDataProcessor():
         df_hotels_out = df_hotels_out[["hotel", "room_type", "rate_type", "nights", "eur", "check_in", "check_out", "eur_sum", "ccy", "rate_avg", "rate_sum", "ts", "vmid"]]
 
         fname = self.final_parquet_path + "hotels.parquet.gzip"
-        df_hotels.to_parquet(fname, compression='gzip')
+        df_hotels_out.to_parquet(fname, compression='gzip')
 
         if self._upload_flag:
             self._x_upload_to_bq(df_hotels_out, "hotels")

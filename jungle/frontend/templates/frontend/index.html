@@ -99,15 +99,15 @@ h1 {
 </div>
 
 <div class="row mainnav-wrapper hide-on-large-only">
-  <div class="col s12 m4 xl2 hoverable">
+  <div class="col s12 m4 xl2">
     <a href="#" data-target="slide-out" class="sidenav-trigger waves-effect waves-light btn-flat"><i class="material-icons">menu</i>menu</a>
   </div>
   {% for x in mainitems %}
-  <div class="col s12 m4 hoverable">
+  <div class="col s12 m4">
     <a href="{{x.cleanurl}}" class="waves-effect waves-light btn-flat"><i class="material-icons left">{{x.icon}}</i>{{x.desc1}}</a>
   </div>
   {% endfor %}
-  <div class="col s12 m4 hoverable">
+  <div class="col s12 m4 hide-on-small-only">
     <a class='dropdown-trigger btn-flat' href='#' data-target='mainnavdrop'><i class="material-icons">arrow_drop_down_circle</i>more</a>
     <ul id='mainnavdrop' class='dropdown-content'>
       {% for x in dropgrp1 %}
