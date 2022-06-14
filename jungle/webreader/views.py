@@ -6,18 +6,23 @@ from .models import *
 from .scripts import *
 
 def myweb(request):
+    return render(request, 'webreader/index.html', {
+        "groups": WebTasks.objects.all().values("group").distinct(),
+    })
+
+
+def update_results(request):
     # within 15 minutes prior to last run
     mintime = WebReader.objects.latest().timestamp - timedelta(minutes=15)
     records = WebReader.objects.filter(timestamp__gte=mintime)
 
     htmldata = {
         "summary": f"{records.count()} reading since UAT {mintime.strftime('%H:%M %b-%d')}",
-        "groups": WebTasks.objects.all().values("group").distinct(),
         "updates": records.filter(status="Updated"),
         "others": records.exclude(status__in=["Updated", "OK"]),
     }
 
-    return render(request, 'webreader/index.html', htmldata)
+    return render(request, 'webreader/webresults.html', htmldata)
 
 
 @login_required(login_url='/admin/login/')

@@ -26,12 +26,17 @@ To set up a new model and its database, go to `settings.py` to INATALLED_APPS, a
 
 Single action is performed in `xxActionSerializer` class; job action group is done in `views(APIView)`. Common libraries are limited and organized in major user-module. Shared things under root (jungle/jungle).
 
-## Deployment checklist
+## Special Usage
 
-> Known issues: the module `commonlib` has cross references to database, and thus make it impossible to perform migrations. Copy the sqlite database to imitate.
+clean db and sink function in `models.py`
+
+> to redo dataprocessing:  update JobControll + run check-in for today or or post a check in with offset (int) to force dataprocessing
+
+> to force a checkin, go to checkin and parse the keyword
+
+## Deployment checklist
 
 - Environment variable for Django and Gcloud
 - OTP token, service token etc.
 - SSH cert is a must to use Token Auth
-- Log settings config level
 - Compute Vision Models

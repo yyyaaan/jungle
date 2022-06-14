@@ -182,18 +182,6 @@ def job_overview_log(request):
     return render(request, "frontend/overviewlog.html", {"logs_by_vm": results})
 
 
-
-def job_overview_vmplot(request):
-    _, vm_list = vm_list_all()
-
-    pagedata = {"graphJSON": get_geoplot_json(
-        vms=vm_list, 
-        height=int(0.5 * int(request.GET["width"])), 
-        width=int(request.GET["width"])
-    )}
-    return render(request, 'frontend/overviewvmplot.html', pagedata)
-
-
 def get_geoplot_json(vms, height=380, width=600):
 
     short_dict = {
@@ -249,3 +237,17 @@ def get_geoplot_json(vms, height=380, width=600):
     )
 
     return dumps(fig, cls=PlotlyJSONEncoder)
+
+
+
+def job_overview_vmplot(request):
+    _, vm_list = vm_list_all()
+
+    plot_width = 0.95 * int(request.GET["width"])
+
+    pagedata = {"graphJSON": get_geoplot_json(
+        vms=vm_list, 
+        height=int(0.5 * plot_width), 
+        width= int(plot_width)
+    )}
+    return render(request, 'frontend/overviewvmplot.html', pagedata)

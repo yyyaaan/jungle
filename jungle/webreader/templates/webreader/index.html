@@ -1,33 +1,22 @@
 {% extends "parent.html" %}
 {% block title %}{{h1text}}{% endblock %}
 {% block head %}
-<style>
-</style>
+<script>
+    window.setInterval(function () {
+        $.ajax({
+            url: '/myweb/update/',
+            success: function(data) {
+                $('#webresults').html(data);
+            }
+        });
+    }, 5000);    
+</script>
 {% endblock %}
 {% block content %} 
 
-
-<div class="container">
-    <blockquote>{{summary}}</blockquote>
+<div id="counter"></div>
+<div class="container" id="webresults">
     <div class="row">
-        {% for x in updates %}
-        <div class="col s6">
-            <div class="card-panel">
-                <a href="{{x.task.webaddress}}">{{x.task.display}}</a><br/>
-                {{x.info}}
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    <div class="row">
-        {% for x in others %}
-        <div class="col s6 m3">
-            <div class="card-panel">
-                <a href="{{x.task.webaddress}}">{{x.task.display}}</a><br/>
-                <small>{{x.status}} {{x.info}}</small>
-            </div>
-        </div>
-        {% endfor %}
         <div class="col s6 m3">
             <div class="card-panel">
             <form action="/myweb/do/" method="post" target="outputarea" onsubmit="return confirm('Are you sure?');">
@@ -42,7 +31,6 @@
         </div>
     </div>
     <iframe id="outputarea" name="outputarea" width="100%" height="300px" style="border:none;"></iframe>
-
 </div>
 
 {% endblock %}

@@ -280,13 +280,13 @@ class YCrawlDataProcessor():
         price_drifts = [
             f"{shorten(x[0])} {x[1]:.1f}% (EUR {x[2]:.0f})" 
             for x in monitor[["hotel", "eur_drift", "mineur"]].values
-            if abs(x[1]) > threshold_price
+            if not isna(x[1]) and abs(x[1]) > threshold_price
         ]
 
         row_drifts = [
             f"{shorten(x[0])} {x[1]:.1f}%" 
             for x in monitor[["hotel", "row_drift"]].values
-            if abs(x[1]) > threshold_row
+            if not isna(x[1]) and abs(x[1]) > threshold_row
         ]
 
         return price_drifts, row_drifts
