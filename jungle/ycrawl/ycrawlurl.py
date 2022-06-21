@@ -246,7 +246,7 @@ class YCrawlJobs:
         self.register_completion()
 
         if (self.checkin(noloop=True)) == (True, self.done):
-            logger.info("All completed for today, starting data process (see Trail)")
+            logger.info("All completed for today, starting data process")
             VmTrail(vmid="DataProcessor", event="start locally", info="Data Processor started here").save()
             
             # avoid double calling
