@@ -12,3 +12,4 @@ class AdminWebReader(admin.ModelAdmin):
 
 admin.site.register(WebTasks, AdminWebTasks)
 admin.site.register(WebReader, AdminWebReader)
+admin.site.register(MarkItDown)

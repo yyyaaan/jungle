@@ -22,3 +22,12 @@ class WebReader(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
     class Meta:
         get_latest_by = 'timestamp'
+
+
+class MarkItDown(models.Model):
+    md = models.TextField("markdown", max_length=1024*1024, blank=True)
+    enabled = models.BooleanField("Show?")
+
+    def __str__(self):
+        rowone = self.md.split("\n")[0]
+        return rowone if self.enabled else f"[Disabled]: {rowone}"

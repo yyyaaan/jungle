@@ -1,12 +1,21 @@
 from datetime import timedelta
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from markdown import markdown
 
 from .models import *
 from .scripts import *
 
+def my(request):
+    
+    objs, rendered = MarkItDown.objects.all().filter(enabled=True), []
+    rendered = [markdown(obj.md) for obj in objs]
+
+    return render(request, 'webreader/index.html', {"htmls": rendered})
+
+
 def myweb(request):
-    return render(request, 'webreader/index.html', {
+    return render(request, 'webreader/webreader.html', {
         "groups": WebTasks.objects.all().values("group").distinct(),
     })
 

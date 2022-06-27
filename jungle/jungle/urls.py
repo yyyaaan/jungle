@@ -26,7 +26,7 @@ urlpatterns = [
     path('play/', include("play.urls")),
     path('vision/', include("vision.urls")),
     path('msg/', include("messenger.urls")),
-    path('myweb/', include("webreader.urls")),
+    path('my/', include("webreader.urls")),
     path('admin/', admin.site.urls),
 ]
 

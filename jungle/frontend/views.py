@@ -243,7 +243,7 @@ def get_geoplot_json(vms, height=380, width=600):
 def job_overview_vmplot(request):
     _, vm_list = vm_list_all()
 
-    plot_width = 0.95 * int(request.GET["width"])
+    plot_width = 0.97 * int(request.GET["width"])
 
     pagedata = {"graphJSON": get_geoplot_json(
         vms=vm_list, 
