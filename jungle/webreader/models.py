@@ -31,3 +31,11 @@ class MarkItDown(models.Model):
     def __str__(self):
         rowone = self.md.split("\n")[0]
         return rowone if self.enabled else f"[Disabled]: {rowone}"
+
+
+class MyDoc(models.Model):
+    desc = models.CharField("Description", max_length = 1024)
+    doc = models.FileField(upload_to='docs')
+
+    def __str__(self):
+        return str(self.doc.url).replace("/media", "https://yan.fi")
