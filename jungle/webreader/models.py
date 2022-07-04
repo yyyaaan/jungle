@@ -38,4 +38,4 @@ class MyDoc(models.Model):
     doc = models.FileField(upload_to='docs')
 
     def __str__(self):
-        return str(self.doc.url).replace("/media", "https://yan.fi")
+        return f"{self.desc}  @  "+str(self.doc.url).replace("/media", "https://yan.fi")

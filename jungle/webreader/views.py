@@ -10,8 +10,13 @@ def my(request):
     
     objs, rendered = MarkItDown.objects.all().filter(enabled=True), []
     rendered = [markdown(obj.md) for obj in objs]
+    docs = [{
+        "url": str(x.doc.url).replace("/media", "https://yan.fi"), 
+        "desc": x.desc,
+        "size": f"{x.doc.size/1024/1024: 0.2f}M",
+    } for x in MyDoc.objects.all().order_by("desc")]
 
-    return render(request, 'webreader/index.html', {"htmls": rendered})
+    return render(request, 'webreader/index.html', {"htmls": rendered, "docs": docs})
 
 
 def myweb(request):
